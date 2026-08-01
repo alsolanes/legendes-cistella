@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 import { Cromo, FormacioEsquema, Jugador, Partida, PartitSimulat, TipusSessio } from './types';
 import {
   crearPartida, jugarJornada, recuperacioSetmanal, temporadaAcabada, novaTemporada,
-  aplicarBonusPartit, posicioUsuari, NovaPartidaConfig, TOTAL_JORNADES,
+  aplicarBonusPartit, posicioUsuari, sanejarAlineacio, NovaPartidaConfig, TOTAL_JORNADES,
 } from './temporada';
 import { mitjana, generarMercat } from './generador';
 import { afegirXp, afegirTitol, registrarTemporada, capturarLlegendes, XP_GUANYAR, XP_PERDRE, XP_JUGAR_BE, XP_TITOL, Perk } from './llegat';
@@ -25,6 +25,9 @@ export interface Toast {
 }
 
 export type Celebracio = 'victoria' | 'titol' | 'campio' | null;
+
+/** Mai es pot deixar la plantilla per sota d'aquest nombre: cal un quintet titular sencer sempre disponible */
+const PLANTILLA_MINIMA = 6; // mai per sota d'aquest nombre (5 titulars + almenys 1 suplent)
 
 function uid(): string {
   return Math.random().toString(36).slice(2, 10);
@@ -60,6 +63,7 @@ function ambAssolimentsNous(p: Partida, afegirToast: (text: string, emoji?: stri
   for (const a of nous) afegirToast(`${a.emoji} Assoliment: ${a.nom}`, a.emoji);
   return { ...p, assolimentsDesbloquejats: [...p.assolimentsDesbloquejats, ...nous.map((a) => a.id)] };
 }
+
 
 interface JocState {
   partida: Partida | null;
@@ -254,16 +258,16 @@ export const useJoc = create<JocState>()(
       acomiadar: (id) => {
         const { partida } = get();
         if (!partida) return;
+        if (partida.plantilla.length <= PLANTILLA_MINIMA) return;
         const jugador = partida.plantilla.find((j) => j.id === id);
         if (!jugador) return;
         const indemnitzacio = Math.round(jugador.sou * 0.5);
-        set({
-          partida: {
-            ...partida,
-            plantilla: partida.plantilla.filter((j) => j.id !== id),
-            finanzas: { ...partida.finanzas, pressupost: partida.finanzas.pressupost - indemnitzacio, despesesTemporada: partida.finanzas.despesesTemporada + indemnitzacio },
-          },
-        });
+        const base: Partida = {
+          ...partida,
+          plantilla: partida.plantilla.filter((j) => j.id !== id),
+          finanzas: { ...partida.finanzas, pressupost: partida.finanzas.pressupost - indemnitzacio, despesesTemporada: partida.finanzas.despesesTemporada + indemnitzacio },
+        };
+        set({ partida: sanejarAlineacio(base) });
       },
 
       renovar: (id) => {
@@ -271,14 +275,17 @@ export const useJoc = create<JocState>()(
         if (!partida) return;
         const jugador = partida.plantilla.find((j) => j.id === id);
         if (!jugador) return;
-        if (!intentaRenovacio(jugador, partida)) {
+        // Si la plantilla ja està al mínim, el club sempre troba la manera de retenir-lo
+        const potRefusar = partida.plantilla.length > PLANTILLA_MINIMA;
+        if (potRefusar && !intentaRenovacio(jugador, partida)) {
           const agentLliure = convertirEnAgentLliure(jugador);
+          const base: Partida = {
+            ...partida,
+            plantilla: partida.plantilla.filter((j) => j.id !== id),
+            mercat: [...partida.mercat, agentLliure],
+          };
           set({
-            partida: {
-              ...partida,
-              plantilla: partida.plantilla.filter((j) => j.id !== id),
-              mercat: [...partida.mercat, agentLliure],
-            },
+            partida: sanejarAlineacio(base),
             toasts: [...get().toasts, { id: uid(), text: `😤 ${jugador.nom} ${jugador.cognom} ha refusat renovar i ha quedat lliure`, emoji: '😤' }],
           });
           return;
@@ -298,16 +305,16 @@ export const useJoc = create<JocState>()(
       vendreJugador: (id) => {
         const { partida } = get();
         if (!partida) return;
+        if (partida.plantilla.length <= PLANTILLA_MINIMA) return;
         const jugador = partida.plantilla.find((j) => j.id === id);
         if (!jugador) return;
         const preu = Math.round(jugador.sou * 2.2);
-        set({
-          partida: {
-            ...partida,
-            plantilla: partida.plantilla.filter((j) => j.id !== id),
-            finanzas: { ...partida.finanzas, pressupost: partida.finanzas.pressupost + preu, ingressosTemporada: partida.finanzas.ingressosTemporada + preu },
-          },
-        });
+        const base: Partida = {
+          ...partida,
+          plantilla: partida.plantilla.filter((j) => j.id !== id),
+          finanzas: { ...partida.finanzas, pressupost: partida.finanzas.pressupost + preu, ingressosTemporada: partida.finanzas.ingressosTemporada + preu },
+        };
+        set({ partida: sanejarAlineacio(base) });
       },
 
       pujarCantera: (id) => {

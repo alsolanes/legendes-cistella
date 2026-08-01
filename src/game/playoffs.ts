@@ -74,7 +74,7 @@ export function jugarRondaPlayoffs(partida: Partida, jornadaBase: number): { par
     partits.push(sim);
 
     if (enf.local === 'meu' || enf.visitant === 'meu') {
-      aplicarResultat(p.plantilla, sim, enf.local === 'meu');
+      aplicarResultat(p.plantilla, sim, enf.local === 'meu', p.alineacio.titulars);
       meuPartit = sim;
       meuGuanya = guanyadorId(enf) === 'meu';
       if (!meuGuanya) estat.meuEliminat = true;

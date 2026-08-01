@@ -142,6 +142,28 @@ function mitjanaAtributs(j: Partida['plantilla'][number]): number {
   return (a.anotacio + a.triple + a.defensa + a.rebot + a.velocitat + a.resistencia) / 6;
 }
 
+/**
+ * Assegura que l'alineació només conté ids presents a la plantilla (per exemple després
+ * d'acomiadar, vendre o perdre un jugador que no ha renovat) i, si el quintet inicial es queda
+ * curt, el completa amb els millors jugadors disponibles de la banqueta. El motor de partit
+ * assumeix sempre 5 titulars vàlids, així que cal cridar-ho cada cop que la plantilla canvia.
+ */
+export function sanejarAlineacio(partida: Partida): Partida {
+  const idsPlantilla = new Set(partida.plantilla.map((j) => j.id));
+  const titulars = partida.alineacio.titulars.filter((id) => idsPlantilla.has(id));
+  if (titulars.length < 5) {
+    const disponibles = partida.plantilla
+      .filter((j) => !titulars.includes(j.id))
+      .sort((a, b) => mitjanaAtributs(b) - mitjanaAtributs(a));
+    for (const candidat of disponibles) {
+      if (titulars.length >= 5) break;
+      titulars.push(candidat.id);
+    }
+  }
+  const banqueta = partida.plantilla.filter((j) => !titulars.includes(j.id)).map((j) => j.id);
+  return { ...partida, alineacio: { ...partida.alineacio, titulars, banqueta } };
+}
+
 function generarCalendari(equips: Array<{ id: string; nom: string }>): Partida['calendari'] {
   // Round-robin (algorisme de cercle) per 12 equips → 22 jornades
   const n = equips.length;
@@ -224,18 +246,20 @@ export function jugarJornada(partida: Partida): { partida: Partida; resultat: Re
       sim = c.local === 'meu'
         ? simularPartit(meuEquip, rivalEquip, jornada)
         : simularPartit(rivalEquip, meuEquip, jornada);
-      // Aplica resultat als jugadors de l'usuari
-      aplicarResultat(p.plantilla, sim, c.local === 'meu');
+      // Aplica resultat als jugadors de l'usuari (segons el quintet que realment ha triat)
+      aplicarResultat(p.plantilla, sim, c.local === 'meu', alineacio.titulars);
     } else {
       // Partit entre rivals: simula ràpid
       const a = rivalsPerId.get(c.local);
       const b = rivalsPerId.get(c.visitant);
       if (!a || !b) continue;
-      const ea: EquipPartit = { id: a.id, nom: a.nom, jugadors: a.plantilla, titulars: a.plantilla.slice(0, 5).map((j) => j.id), esquema: 'clasica', pressing: false };
-      const eb: EquipPartit = { id: b.id, nom: b.nom, jugadors: b.plantilla, titulars: b.plantilla.slice(0, 5).map((j) => j.id), esquema: 'clasica', pressing: false };
+      const titularsA = a.plantilla.slice(0, 5).map((j) => j.id);
+      const titularsB = b.plantilla.slice(0, 5).map((j) => j.id);
+      const ea: EquipPartit = { id: a.id, nom: a.nom, jugadors: a.plantilla, titulars: titularsA, esquema: 'clasica', pressing: false };
+      const eb: EquipPartit = { id: b.id, nom: b.nom, jugadors: b.plantilla, titulars: titularsB, esquema: 'clasica', pressing: false };
       sim = simularPartit(ea, eb, jornada);
-      aplicarResultat(a.plantilla, sim, true);
-      aplicarResultat(b.plantilla, sim, false);
+      aplicarResultat(a.plantilla, sim, true, titularsA);
+      aplicarResultat(b.plantilla, sim, false, titularsB);
     }
     // Guardem resultat al calendari
     const partitCal = p.calendari.find((cc) => cc.jornada === jornada && ((cc.local === c.local && cc.visitant === c.visitant)));

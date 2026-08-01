@@ -47,6 +47,27 @@ describe('Bonus de minijoc sobre el resultat', () => {
   });
 });
 
+describe('Els minuts i punts es reparteixen segons el quintet triat, no per ordre de la plantilla', () => {
+  it('si canviem els titulars, els minuts van als jugadors seleccionats de veritat', () => {
+    let p = partidaBase();
+    // Titulars diferents dels 5 primers de la plantilla (que és amb qui es crea la partida)
+    const titularsOriginals = p.plantilla.slice(0, 5).map((j) => j.id);
+    const titularsNous = p.plantilla.slice(-5).map((j) => j.id);
+    expect(new Set(titularsNous).size).toBe(5);
+    p = { ...p, alineacio: { ...p.alineacio, titulars: titularsNous, banqueta: p.plantilla.filter((j) => !titularsNous.includes(j.id)).map((j) => j.id) } };
+
+    const { partida: nova } = jugarJornada(p);
+
+    const minutsTitularsNous = nova.plantilla.filter((j) => titularsNous.includes(j.id)).reduce((s, j) => s + j.minutsJugats, 0);
+    const minutsOriginals = nova.plantilla.filter((j) => titularsOriginals.includes(j.id) && !titularsNous.includes(j.id)).reduce((s, j) => s + j.minutsJugats, 0);
+
+    // Els titulars triats han de jugar molts més minuts (28-36 cadascun) que els antics titulars
+    // que ara són banqueta (uns pocs minuts cadascun).
+    expect(minutsTitularsNous).toBeGreaterThan(minutsOriginals);
+    expect(minutsTitularsNous).toBeGreaterThanOrEqual(28 * 5);
+  });
+});
+
 describe('Nova temporada (mateix club)', () => {
   it('envelleix la plantilla i reinicia la classificació mantenint el club', () => {
     let p = partidaBase();

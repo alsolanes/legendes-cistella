@@ -259,11 +259,15 @@ function puntsPerPossessio(_eficiencia: number, atac: number, defensa: number, s
   return 0;
 }
 
-/** Aplica el resultat d'un partit als jugadors (forma, minuts, punts) i retorna el PartitSimulat */
-export function aplicarResultat(equip: Jugador[], partit: PartitSimulat, esLocal: boolean): void {
+/**
+ * Aplica el resultat d'un partit als jugadors (forma, minuts, punts).
+ * `titularIds`: ids exactes del quintet inicial (l'alineació pot no coincidir amb els primers
+ * 5 de l'array si l'usuari ha canviat titulars); si no se'n passen, s'assumeixen els 5 primers.
+ */
+export function aplicarResultat(equip: Jugador[], partit: PartitSimulat, esLocal: boolean, titularIds?: string[]): void {
   const stats = esLocal ? partit.stats.local : partit.stats.visitant;
-  const titulars = equip.slice(0, 5);
-  const banqueta = equip.slice(5);
+  const titulars = titularIds ? equip.filter((j) => titularIds.includes(j.id)) : equip.slice(0, 5);
+  const banqueta = titularIds ? equip.filter((j) => !titularIds.includes(j.id)) : equip.slice(5);
   const nTitulars = titulars.length;
 
   for (let i = 0; i < nTitulars; i++) {

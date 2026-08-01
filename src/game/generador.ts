@@ -1,6 +1,8 @@
 // ── Generació de jugadors, plantilles i rivals ────────────────
 import { Atributs, Jugador, Posicio, Rival } from './types';
 import { aleatori, entre, nomAleatori, POBLES, NOMS_RIVALS, CIUTATS_RIVALS } from './dades';
+import { getTownPointFlexible } from '../utils/catalunyaMap';
+import { CATALUNYA_TOWN_POINTS } from '../data/catalunyaTownPoints';
 
 let seq = 0;
 function uid(prefix: string): string {
@@ -54,6 +56,9 @@ export function generarJugador(nivell: number, posicio?: Posicio): Jugador {
   const edat = entre(18, 34);
   const atributs = atributsPerNivell(nivell, pos, edat);
   const [nom, cognom] = nomAleatori().split(' ');
+  // Potencial ocult: com més jove, més marge de creixement per sobre del nivell actual
+  const margeEdat = Math.max(0, 27 - edat) * 1.6;
+  const potencial = Math.max(mitjana(atributs), Math.min(99, Math.round(mitjana(atributs) + margeEdat + entre(-3, 10))));
   return {
     id: uid('j'),
     nom,
@@ -74,7 +79,20 @@ export function generarJugador(nivell: number, posicio?: Posicio): Jugador {
     punts: 0,
     rebots: 0,
     assistencies: 0,
+    potencial,
   };
+}
+
+/** Icones ràpides d'habilitat (a l'estil "skills" de referents del gènere): 3PT, REB, PAS, DEF, VEL */
+export function simbolsJugador(atributs: Atributs): string[] {
+  const simbols: string[] = [];
+  if (atributs.triple >= 78) simbols.push('3PT');
+  if (atributs.rebot >= 78) simbols.push('REB');
+  if (atributs.anotacio >= 78) simbols.push('ANO');
+  if (atributs.defensa >= 78) simbols.push('DEF');
+  if (atributs.velocitat >= 82) simbols.push('VEL');
+  if (atributs.resistencia >= 85) simbols.push('MOT');
+  return simbols;
 }
 
 export function plantillaInicial(nivellGeneral: number): Jugador[] {
@@ -108,17 +126,33 @@ export function generarRival(nom: string, nivell: number, ciutat?: string): Riva
   };
 }
 
-export function crearRivalsLliga(_nomPoble: string, _nivellClub: number): Rival[] {
+/** Troba els `n` pobles reals més propers (per coordenades del mapa) a `poble`, si es coneix */
+function poblesRealsPropers(poble: string, n: number, exclosos: Set<string>): string[] {
+  const punt = getTownPointFlexible(poble);
+  if (!punt) return [];
+  return CATALUNYA_TOWN_POINTS
+    .filter((t) => t.key !== punt.key && !exclosos.has(t.name))
+    .map((t) => ({ nom: t.name, dist: Math.hypot(t.x - punt.x, t.y - punt.y) }))
+    .sort((a, b) => a.dist - b.dist)
+    .slice(0, n)
+    .map((t) => t.nom);
+}
+
+export function crearRivalsLliga(nomPoble: string, _nivellClub: number): Rival[] {
   // 11 rivals amb nivells ABSOLUTS (no relatius al club):
-  //   - 3 catalans: comarca, fluixos (42-62)
+  //   - 3 catalans: pobles propers de veritat al mapa (o comarca aleatòria si no es troba), fluixos (42-62)
   //   - 2 favorits de la lliga: forts de veritat (72-92)
   //   - 6 mitjans: 45-70
   // Així un club de nivell 85 és el favorit clar i un de 40 lluita per sobreviure.
   const rivals: Rival[] = [];
-  const usades = new Set<string>([_nomPoble]);
+  const usades = new Set<string>([nomPoble]);
+  const propersReals = poblesRealsPropers(nomPoble, 3, usades);
   for (let i = 0; i < 3; i++) {
-    let ciutat = aleatori(POBLES);
-    while (usades.has(ciutat)) ciutat = aleatori(POBLES);
+    let ciutat = propersReals[i];
+    if (!ciutat) {
+      ciutat = aleatori(POBLES);
+      while (usades.has(ciutat)) ciutat = aleatori(POBLES);
+    }
     usades.add(ciutat);
     rivals.push(generarRival(`${ciutat} CB`, entre(42, 62), ciutat));
   }
@@ -131,4 +165,52 @@ export function crearRivalsLliga(_nomPoble: string, _nivellClub: number): Rival[
     rivals.push(generarRival(`${aleatori(NOMS_RIVALS)} de ${ciutat}`, entre(45, 70), ciutat));
   }
   return rivals;
+}
+
+/** Envelleix la plantilla d'una temporada a la següent: +1 any, evolució lleu d'atributs
+ * (creixement si són joves, declivi si són veterans), reinici de forma/moral/contracte. */
+export function envellirPlantilla(plantilla: Jugador[]): Jugador[] {
+  return plantilla.map((j) => {
+    const novaEdat = j.edat + 1;
+    const factor = novaEdat < 24 ? 1.03 : novaEdat > 31 ? 0.95 : 1.0;
+    const soroll = () => entre(-2, 2);
+    const atributs: Atributs = {
+      anotacio: Math.max(25, Math.min(99, Math.round(j.atributs.anotacio * factor + soroll()))),
+      triple: Math.max(25, Math.min(99, Math.round(j.atributs.triple * factor + soroll()))),
+      defensa: Math.max(25, Math.min(99, Math.round(j.atributs.defensa * factor + soroll()))),
+      rebot: Math.max(25, Math.min(99, Math.round(j.atributs.rebot * factor + soroll()))),
+      velocitat: Math.max(25, Math.min(99, Math.round(j.atributs.velocitat * factor + soroll()))),
+      resistencia: Math.max(25, Math.min(99, Math.round(j.atributs.resistencia * factor + soroll()))),
+    };
+    return {
+      ...j,
+      edat: novaEdat,
+      atributs,
+      estrelles: estrellesDe(atributs),
+      forma: entre(65, 85),
+      moral: entre(60, 80),
+      contracteAnys: Math.max(0, j.contracteAnys - 1),
+      minutsJugats: 0,
+      punts: 0,
+      rebots: 0,
+      assistencies: 0,
+      estat: 'actiu',
+      lesioSetmanes: 0,
+      sancionSetmanes: 0,
+    };
+  });
+}
+
+/** Genera una llista de jugadors del mercat de fitxatges, amb preu de traspàs segons el seu nivell */
+export function generarMercat(nivellClub: number, n = 8): Jugador[] {
+  const posicions: Posicio[] = ['Base', 'Escorta', 'Aler', 'Ala-pivot', 'Pivot'];
+  const jugadors: Jugador[] = [];
+  for (let i = 0; i < n; i++) {
+    const pos = posicions[i % posicions.length];
+    const nivell = Math.max(35, Math.min(92, nivellClub + entre(-16, 22)));
+    const j = generarJugador(nivell, pos);
+    j.preuFitxatge = Math.round(mitjana(j.atributs) * 900 + entre(2000, 15000));
+    jugadors.push(j);
+  }
+  return jugadors;
 }

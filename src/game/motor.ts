@@ -1,7 +1,7 @@
 // ── Motor de simulació de partits ─────────────────────────────
 // Genera una crònica llegible, estadístiques realistes i un resultat
 // que depèn de la força dels equips, la forma i la moral.
-import { EstadistiquesPartit, Jugador, PartitEvent, PartitSimulat, Posicio } from './types';
+import { EstadistiquesPartit, FormacioEsquema, Jugador, PartitEvent, PartitSimulat, Posicio } from './types';
 import { entre } from './dades';
 
 export interface EquipPartit {
@@ -9,7 +9,7 @@ export interface EquipPartit {
   nom: string;
   jugadors: Jugador[]; // 12
   titulars: string[]; // ids
-  esquema: 'clasica' | 'exterior' | 'interior' | 'transicio';
+  esquema: FormacioEsquema;
   pressing: boolean;
 }
 
@@ -36,6 +36,7 @@ export function forcaEquip(equip: EquipPartit): number {
   if (equip.esquema === 'exterior') bonus = titulars.reduce((s, j) => s + j.atributs.triple, 0) / titulars.length - 60;
   if (equip.esquema === 'interior') bonus = titulars.reduce((s, j) => s + j.atributs.rebot, 0) / titulars.length - 60;
   if (equip.esquema === 'transicio') bonus = titulars.reduce((s, j) => s + j.atributs.velocitat, 0) / titulars.length - 60;
+  if (equip.esquema === 'zona23') bonus = titulars.reduce((s, j) => s + j.atributs.defensa, 0) / titulars.length - 60;
   if (equip.pressing) bonus += 2;
   return Math.max(35, Math.min(95, total / titulars.length + bonus * 0.3));
 }

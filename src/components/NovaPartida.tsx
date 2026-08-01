@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useJoc } from '../game/store';
-import { aleatori, POBLES } from '../game/dades';
+import { MapaCatalunya } from './MapaCatalunya';
+import { formatNomPoble, getTownPointFlexible, poblesDeComarca } from '../utils/catalunyaMap';
 
 const COLORS = [
   ['#ff8c42', '#b83a1e'],
@@ -16,17 +17,33 @@ const COLORS = [
 export function NovaPartida() {
   const novaPartida = useJoc((s) => s.novaPartida);
   const [nom, setNom] = useState('');
-  const [ciutat, setCiutat] = useState(aleatori(POBLES));
+  const [nomTocat, setNomTocat] = useState(false);
+  const [comarca, setComarca] = useState<string | null>(null);
+  const [poble, setPoble] = useState<string | null>(null);
   const [nivell, setNivell] = useState(50);
   const [color, setColor] = useState(0);
 
-  const potCrear = nom.trim().length >= 2;
+  const pobles = useMemo(() => (comarca ? poblesDeComarca(comarca) : []), [comarca]);
+  const puntPoble = useMemo(() => (poble ? getTownPointFlexible(poble) : null), [poble]);
+
+  const potCrear = nom.trim().length >= 2 && !!poble;
+
+  const triarComarca = (nomComarca: string) => {
+    setComarca(nomComarca);
+    setPoble(null);
+  };
+
+  const triarPoble = (nomPoble: string) => {
+    setPoble(nomPoble);
+    if (!nomTocat) setNom(`CB ${formatNomPoble(nomPoble)}`);
+  };
 
   const crear = () => {
-    if (!potCrear) return;
+    if (!potCrear || !poble) return;
     novaPartida({
       clubNom: nom.trim(),
-      ciutat,
+      ciutat: poble,
+      comarca: comarca ?? undefined,
       colorPrincipal: COLORS[color][0],
       colorSecundari: COLORS[color][1],
       nivell,
@@ -42,24 +59,41 @@ export function NovaPartida() {
       </div>
 
       <div className="card">
+        <div className="card-titol">
+          <span>Escull el teu poble</span>
+          <span>{comarca ?? 'Clica una comarca'}</span>
+        </div>
+        <MapaCatalunya
+          comarcaSeleccionada={comarca}
+          onSeleccionarComarca={triarComarca}
+          marcadors={puntPoble ? [{ x: puntPoble.x, y: puntPoble.y, color: COLORS[color][0], label: formatNomPoble(poble!), mida: 5.5 }] : []}
+        />
+        {comarca && (
+          <div className="pobles-llista">
+            {pobles.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>Sense pobles per aquesta comarca.</div>}
+            {pobles.map((p) => (
+              <button
+                key={p}
+                className={`btn ${poble === p ? 'btn-primari' : 'btn-secundari'}`}
+                style={{ padding: '6px 10px', fontSize: 12 }}
+                onClick={() => triarPoble(p)}
+              >
+                {formatNomPoble(p)}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="card">
         <div className="form-grup">
           <label>Nom del club</label>
           <input
             className="input"
             placeholder="CB Solsona, Bàsquet Artés..."
             value={nom}
-            onChange={(e) => setNom(e.target.value)}
+            onChange={(e) => { setNom(e.target.value); setNomTocat(true); }}
             maxLength={30}
-          />
-        </div>
-
-        <div className="form-grup">
-          <label>Ciutat / Poble</label>
-          <input
-            className="input"
-            value={ciutat}
-            onChange={(e) => setCiutat(e.target.value)}
-            maxLength={24}
           />
         </div>
 
@@ -100,7 +134,7 @@ export function NovaPartida() {
         </button>
         {!potCrear && (
           <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)', marginTop: 8 }}>
-            Posa un nom al club per començar
+            {!poble ? 'Tria un poble al mapa i posa un nom al club per començar' : 'Posa un nom al club per començar'}
           </div>
         )}
       </div>
@@ -108,10 +142,11 @@ export function NovaPartida() {
       <div className="card" style={{ background: 'transparent', borderStyle: 'dashed' }}>
         <div className="card-titol"><span>Com funciona</span></div>
         <ul style={{ fontSize: 13, color: 'var(--text-dim)', lineHeight: 1.8, paddingLeft: 18 }}>
+          <li>🗺 Tria un poble real al mapa de Catalunya: hi tindràs rivals catalans propers</li>
           <li>🏀 Gestiona la plantilla: tria el quintet inicial i l'esquema tàctic</li>
-          <li>📅 22 jornades de lliga contra 11 rivals (catalans i de la resta de l'estat)</li>
-          <li>💰 Cuida les finances: taquilla, patrocini, fitxatges i millores del pavelló</li>
-          <li>⭐ Cada jugador té 6 atributs, forma i moral que canvien amb els resultats</li>
+          <li>📅 22 jornades de lliga contra 11 rivals, playoffs pels 6 primers i cantera pròpia</li>
+          <li>💰 Cuida les finances: taquilla, patrocini, fitxatges, sostre salarial i millores del pavelló</li>
+          <li>🎁 Obre sobres de cromos, entrena la plantilla i visita el Bar dels Pavellons</li>
           <li>📈 Els resultats de la teva gestió es guarden automàticament</li>
         </ul>
       </div>

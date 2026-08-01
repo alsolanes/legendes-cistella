@@ -1,13 +1,19 @@
 import { useJoc } from '../game/store';
+import { calcularLuxuryTaxSetmanal, calcularSalaryCap, massaSalarialTotal } from '../game/contractes';
 
 export function Finances() {
   const partida = useJoc((s) => s.partida);
   const millorarPavello = useJoc((s) => s.millorarPavello);
+  const millorarInstalacions = useJoc((s) => s.millorarInstalacions);
   if (!partida) return null;
 
   const f = partida.finanzas;
   const costPavello = partida.pavello.nivell < 5 ? partida.pavello.preuPerNivell * partida.pavello.nivell : 0;
+  const costInstalacions = partida.instalacions.nivell < 5 ? partida.instalacions.preuPerNivell * partida.instalacions.nivell : 0;
   const saldo = f.ingressosTemporada - f.despesesTemporada;
+  const cap = calcularSalaryCap(partida);
+  const massa = massaSalarialTotal(partida);
+  const tax = calcularLuxuryTaxSetmanal(partida);
 
   return (
     <>
@@ -62,6 +68,47 @@ export function Finances() {
           </button>
         ) : (
           <div style={{ textAlign: 'center', color: 'var(--verd)', fontWeight: 700 }}>🏟 Pavelló al màxim nivell!</div>
+        )}
+      </div>
+
+      {/* Instal·lacions d'entrenament */}
+      <div className="card">
+        <div className="card-titol"><span>Instal·lacions d&apos;entrenament</span><span>Nivell {partida.instalacions.nivell}/5</span></div>
+        <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div key={n} style={{ flex: 1, height: 8, borderRadius: 4, background: n <= partida.instalacions.nivell ? 'var(--blau)' : 'var(--fons)' }} />
+          ))}
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 12 }}>
+          Millors instal·lacions fan que l&apos;entrenament sigui més efectiu.
+        </div>
+        {partida.instalacions.nivell < 5 ? (
+          <button
+            className="btn btn-primari btn-blok"
+            onClick={() => millorarInstalacions()}
+            disabled={f.pressupost < costInstalacions}
+            style={{ opacity: f.pressupost < costInstalacions ? 0.5 : 1 }}
+          >
+            🏋️ Millorar instal·lacions ({costInstalacions.toLocaleString('ca')}€) → Nivell {partida.instalacions.nivell + 1}
+          </button>
+        ) : (
+          <div style={{ textAlign: 'center', color: 'var(--verd)', fontWeight: 700 }}>🏋️ Instal·lacions al màxim nivell!</div>
+        )}
+      </div>
+
+      {/* Sostre salarial */}
+      <div className="card">
+        <div className="card-titol"><span>Sostre salarial</span><span>{massa > cap ? 'Superat!' : 'Dins del límit'}</span></div>
+        <div className="xp-barra">
+          <div style={{ width: `${Math.min(100, (massa / cap) * 100)}%`, background: massa > cap ? 'var(--vermell)' : undefined }} />
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 8 }}>
+          Massa salarial: {massa.toLocaleString('ca')}€ / {cap.toLocaleString('ca')}€
+        </div>
+        {tax > 0 && (
+          <div style={{ fontSize: 12, color: 'var(--vermell)', marginTop: 4, fontWeight: 700 }}>
+            ⚠️ Pagues {tax.toLocaleString('ca')}€/jornada d&apos;impost de luxe per superar el sostre
+          </div>
         )}
       </div>
 

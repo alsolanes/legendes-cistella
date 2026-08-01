@@ -4,7 +4,12 @@ const PESTANYES = [
   { id: 'tauler', etiqueta: '📊 Tauler' },
   { id: 'plantilla', etiqueta: '🏀 Plantilla' },
   { id: 'partit', etiqueta: '📅 Partit' },
+  { id: 'entrenament', etiqueta: '🏋️ Entrenament' },
   { id: 'finances', etiqueta: '💰 Finances' },
+  { id: 'jocs', etiqueta: '🍻 Jocs' },
+  { id: 'cromos', etiqueta: '📖 Cromos' },
+  { id: 'llegat', etiqueta: '🎖️ Llegat' },
+  { id: 'mapa', etiqueta: '🗺️ Mapa' },
 ];
 
 export function Pestanyes() {

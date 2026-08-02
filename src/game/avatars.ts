@@ -18,6 +18,15 @@ import f7 from '../assets/avatar-f7.webp';
 import f8 from '../assets/avatar-f8.webp';
 import f9 from '../assets/avatar-f9.webp';
 
+export const AVATARS_MASCULINS: string[] = [m1, m2, m3, m4, m5, m6, m7, m8, m9];
+export const AVATARS_FEMENINS: string[] = [f1, f2, f3, f4, f5, f6, f7, f8, f9];
+
+/** Llista segons el gènere del jugador — mai creuar-los (un home NO pot tenir avatar femení) */
+export function avatarsPerGenere(genere: 'm' | 'f'): string[] {
+  return genere === 'm' ? AVATARS_MASCULINS : AVATARS_FEMENINS;
+}
+
+// Backwards compatibility (codi que encara usa la llista intercalada vella)
 export const AVATARS: string[] = [
   m1, f1, m2, f2, m3, f3, m4, f4, m5, f5, m6, f6,
   m7, f7, m8, f8, m9, f9,

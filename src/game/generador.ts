@@ -1,9 +1,9 @@
 // ── Generació de jugadors, plantilles i rivals ────────────────
-import { Atributs, Jugador, Posicio, Rival } from './types';
-import { aleatori, entre, nomAleatori, POBLES, NOMS_RIVALS, CIUTATS_RIVALS } from './dades';
+import { Atributs, Jugador, Partida, Posicio, Rival } from './types';
+import { aleatori, entre, nomAleatori, POBLES, NOMS_RIVALS, CIUTATS_RIVALS, NOMS_MASCULINS, NOMS_FEMENINS } from './dades';
 import { getTownPointFlexible } from '../utils/catalunyaMap';
 import { CATALUNYA_TOWN_POINTS } from '../data/catalunyaTownPoints';
-import { AVATARS } from './avatars';
+import { avatarsPerGenere } from './avatars';
 import { ESCUTS } from './escuts';
 
 let seq = 0;
@@ -13,26 +13,61 @@ function uid(prefix: string): string {
 }
 
 /** Assigna un avatar de forma pseudoaleatòria però determinista (basada en el comptador de generació, no Math.random) */
-function avatarPerIndex(): string {
-  return AVATARS[seq % AVATARS.length];
+function avatarPerIndex(genere: 'm' | 'f' = 'm'): string {
+  const llista = avatarsPerGenere(genere);
+  return llista[seq % llista.length];
 }
 
 /** Avatar per a un jugador que s'incorpora a una plantilla (fitxatge, cantera): evita repetir
- * l'avatar d'algú que ja hi és, perquè cada fitxa de l'equip es distingeixi a cop d'ull. */
-export function avatarUnicPer(plantilla: Jugador[]): string {
-  const usats = new Set(plantilla.map((j) => j.avatar));
-  return AVATARS.find((a) => !usats.has(a)) ?? avatarPerIndex();
+ * l'avatar d'algú que ja hi és, i respecta el gènere del jugador (derivat del seu nom). */
+export function avatarUnicPer(plantilla: Jugador[], jugador: Jugador): string {
+  const gen = esGenere(jugador, 'f') ? 'f' : 'm';
+  const llista = avatarsPerGenere(gen);
+  const usats = new Set(plantilla.filter((j) => esGenere(j, gen)).map((j) => j.avatar));
+  return llista.find((a) => !usats.has(a)) ?? avatarPerIndex(gen);
 }
 
 /** Avatar diferent de l'actual per al botó "Regenera avatar": prioritza un que ningú més
- * de la plantilla tingui, si no n'hi ha cap de lliure en tria un de diferent a l'actual igualment. */
+ * de la plantilla tingui (del mateix gènere), si no n'hi ha cap de lliure en tria un de diferent a l'actual. */
 export function avatarDiferentA(plantilla: Jugador[], jugadorId: string): string {
-  const actual = plantilla.find((j) => j.id === jugadorId)?.avatar;
-  const usatsPerAltres = new Set(plantilla.filter((j) => j.id !== jugadorId).map((j) => j.avatar));
-  const lliures = AVATARS.filter((a) => a !== actual && !usatsPerAltres.has(a));
+  const j = plantilla.find((x) => x.id === jugadorId);
+  if (!j) return avatarPerIndex();
+  const gen = esGenere(j, 'f') ? 'f' : 'm';
+  const llista = avatarsPerGenere(gen);
+  const actual = j.avatar;
+  const usatsPerAltres = new Set(plantilla.filter((x) => x.id !== jugadorId && esGenere(x, gen)).map((x) => x.avatar));
+  const lliures = llista.filter((a) => a !== actual && !usatsPerAltres.has(a));
   if (lliures.length > 0) return aleatori(lliures);
-  const diferents = AVATARS.filter((a) => a !== actual);
-  return aleatori(diferents.length > 0 ? diferents : AVATARS);
+  const diferents = llista.filter((a) => a !== actual);
+  return aleatori(diferents.length > 0 ? diferents : llista);
+}
+
+/** Determina el gènere d'un jugador pel seu nom (la llista de noms està separada per gènere). */
+export function esGenere(j: Jugador, genere: 'm' | 'f'): boolean {
+  const llista = genere === 'm' ? NOMS_MASCULINS : NOMS_FEMENINS;
+  return llista.includes(j.nom);
+}
+
+/** Corregeix un avatar que no correspon al gènere del nom (migració de partides velles
+ * que assignaven avatars per seqüència intercalada sense mirar el gènere). */
+export function corregirAvatarPerGenere(j: Jugador): Jugador {
+  const esFem = esGenere(j, 'f');
+  const llista = avatarsPerGenere(esFem ? 'f' : 'm');
+  const correcte = llista.includes(j.avatar);
+  if (correcte) return j;
+  return { ...j, avatar: llista[0] };
+}
+
+/** Aplica la correcció de gènere a tots els jugadors d'una partida (plantilla, cantera, rivals). */
+export function corregirAvatarsPartida(p: Partida): Partida {
+  const fixar = (j: Jugador) => corregirAvatarPerGenere(j);
+  return {
+    ...p,
+    plantilla: p.plantilla.map(fixar),
+    cantera: (p.cantera ?? []).map(fixar),
+    rivals: p.rivals.map((r) => ({ ...r, plantilla: r.plantilla.map(fixar) })),
+    mercat: (p.mercat ?? []).map(fixar),
+  };
 }
 
 export function mitjana(atributs: Atributs): number {
@@ -76,11 +111,13 @@ export function atributsPerNivell(nivell: number, posicio: Posicio, edat: number
   };
 }
 
-export function generarJugador(nivell: number, posicio?: Posicio): Jugador {
+export function generarJugador(nivell: number, posicio?: Posicio, genere?: 'm' | 'f'): Jugador {
   const pos: Posicio = posicio ?? (['Base', 'Escorta', 'Aler', 'Ala-pivot', 'Pivot'] as Posicio[])[entre(0, 4)];
   const edat = entre(18, 34);
   const atributs = atributsPerNivell(nivell, pos, edat);
-  const [nom, cognom] = nomAleatori().split(' ');
+  // El gènere es tria un sol cop i defineix TANT el nom com l'avatar — mai es creuen
+  const gen: 'm' | 'f' = genere ?? (Math.random() < 0.55 ? 'm' : 'f');
+  const [nom, cognom] = nomAleatori(gen).split(' ');
   // Potencial ocult: com més jove, més marge de creixement per sobre del nivell actual
   const margeEdat = Math.max(0, 27 - edat) * 1.6;
   const potencial = Math.max(mitjana(atributs), Math.min(99, Math.round(mitjana(atributs) + margeEdat + entre(-3, 10))));
@@ -105,7 +142,7 @@ export function generarJugador(nivell: number, posicio?: Posicio): Jugador {
     rebots: 0,
     assistencies: 0,
     potencial,
-    avatar: avatarPerIndex(),
+    avatar: avatarPerIndex(gen),
   };
 }
 

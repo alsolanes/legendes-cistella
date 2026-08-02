@@ -6,10 +6,10 @@ import {
   crearPartida, jugarJornada, recuperacioSetmanal, temporadaAcabada, novaTemporada,
   aplicarBonusPartit, posicioUsuari, sanejarAlineacio, NovaPartidaConfig, TOTAL_JORNADES,
 } from './temporada';
-import { mitjana, generarMercat, avatarUnicPer, avatarDiferentA } from './generador';
+import { mitjana, generarMercat, avatarUnicPer, avatarDiferentA, corregirAvatarsPartida } from './generador';
 import { afegirXp, afegirTitol, registrarTemporada, capturarLlegendes, XP_GUANYAR, XP_PERDRE, XP_JUGAR_BE, XP_TITOL, Perk } from './llegat';
 import { generarSobre, afegirCromosAColleccio, PREU_SOBRE, xpAleatoriaSobre } from './cromos';
-import { aplicarEntrenament, SESSIONS_PER_SETMANA } from './entrenament';
+import { aplicarEntrenament, infoSessio, SESSIONS_PER_SETMANA } from './entrenament';
 import { comprovarAssolimentsNous } from './assoliments';
 import { decidirOcasioMinijoc, bonusPerMinijoc, OcasioMinijoc, TipusMinijoc } from './minijocs';
 import { potJugar, marcarJugat, costJoc, PremiRuleta, ResultatRasca } from './jocs';
@@ -228,7 +228,7 @@ export const useJoc = create<JocState>()(
         const { partida } = get();
         if (!partida || partida.plantilla.length >= 14) return false;
         if (partida.finanzas.pressupost < sou) return false;
-        const fitxat = { ...jugador, sou, contracteAnys: 2, avatar: avatarUnicPer(partida.plantilla) };
+        const fitxat = { ...jugador, sou, contracteAnys: 2, avatar: avatarUnicPer(partida.plantilla, jugador) };
         set({
           partida: {
             ...partida,
@@ -248,7 +248,7 @@ export const useJoc = create<JocState>()(
         if (partida.finanzas.pressupost < preu) return false;
         let p: Partida = {
           ...partida,
-          plantilla: [...partida.plantilla, { ...jugador, contracteAnys: 2, avatar: avatarUnicPer(partida.plantilla) }],
+          plantilla: [...partida.plantilla, { ...jugador, contracteAnys: 2, avatar: avatarUnicPer(partida.plantilla, jugador) }],
           mercat: partida.mercat.filter((j) => j.id !== id),
           finanzas: { ...partida.finanzas, pressupost: partida.finanzas.pressupost - preu, despesesTemporada: partida.finanzas.despesesTemporada + preu },
         };
@@ -340,7 +340,7 @@ export const useJoc = create<JocState>()(
         set({
           partida: {
             ...partida,
-            plantilla: [...partida.plantilla, { ...jove, contracteAnys: 3, avatar: avatarUnicPer(partida.plantilla) }],
+            plantilla: [...partida.plantilla, { ...jove, contracteAnys: 3, avatar: avatarUnicPer(partida.plantilla, jove) }],
             cantera: partida.cantera.filter((j) => j.id !== id),
           },
           toasts: [...get().toasts, { id: uid(), text: `${jove.nom} ${jove.cognom} puja al primer equip!`, icona: 'cantera' as const }],
@@ -364,17 +364,31 @@ export const useJoc = create<JocState>()(
       },
 
       entrenar: (tipus, participantIds) => {
-        const { partida } = get();
+        const { partida, toasts } = get();
         if (!partida) return false;
         if (partida.entrenamentSetmana.sessionsFetes >= SESSIONS_PER_SETMANA) return false;
         const multiplicador = 1 + (partida.instalacions.nivell - 1) * 0.15;
+        const abans = new Map(participantIds.map((id) => {
+          const j = partida.plantilla.find((p) => p.id === id);
+          return [id, j ? mitjana(j.atributs) : 0] as const;
+        }));
         const plantilla = aplicarEntrenament(partida.plantilla, tipus, participantIds, multiplicador);
+        const info = infoSessio(tipus);
+        const guanys = participantIds.map((id) => {
+          const j = plantilla.find((p) => p.id === id);
+          const d = j ? mitjana(j.atributs) - (abans.get(id) ?? 0) : 0;
+          return { nom: j ? `${j.nom} ${j.cognom}` : '', d };
+        }).filter((g) => g.d > 0);
+        const resum = guanys.length > 0
+          ? `Entrenament de ${info.nom}: ${guanys.slice(0, 3).map((g) => `${g.nom} +${g.d}`).join(', ')}${guanys.length > 3 ? ` i ${guanys.length - 3} més` : ''}`
+          : `Sessió de ${info.nom} feta (ganys mínims, jugadors cansats?)`;
         set({
           partida: {
             ...partida,
             plantilla,
             entrenamentSetmana: { ...partida.entrenamentSetmana, sessionsFetes: partida.entrenamentSetmana.sessionsFetes + 1 },
           },
+          toasts: [...toasts, { id: uid(), text: resum, icona: 'perk' as const }],
         });
         return true;
       },
@@ -495,7 +509,12 @@ export const useJoc = create<JocState>()(
 
       reiniciar: () => set({ partida: null, ultimaJornada: null, toasts: [], minijocPendent: null, celebracio: null, anecdotaPendent: null, darrerSobre: null }),
     }),
-    { name: 'legendes-cistella-save' },
+    { name: 'legendes-cistella-save', version: 2, migrate: (state) => {
+      // Migració v1→v2: corregeix avatars creuats (un home no pot tenir avatar femení)
+      const s = state as { partida?: Partida | null };
+      if (s.partida) s.partida = corregirAvatarsPartida(s.partida);
+      return state as never;
+    } },
   ),
 );
 

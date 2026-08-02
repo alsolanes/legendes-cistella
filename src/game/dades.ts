@@ -1,9 +1,12 @@
 // ── Dades de noms i pobles catalans ────────────────────────────
 
-export const NOMS = [
+export const NOMS_MASCULINS = [
   'Pol', 'Arnau', 'Marc', 'Jordi', 'Pau', 'Adrià', 'Guillem', 'Èric', 'Àlex', 'Sergi',
   'Joel', 'Jan', 'Nil', 'Gerard', 'Oriol', 'Xavier', 'Roger', 'Albert', 'David', 'Toni',
   'Ferran', 'Lluc', 'Biel', 'Quim', 'Isaac', 'Martí', 'Roc', 'Cesc', 'Iu', 'Berto',
+];
+
+export const NOMS_FEMENINS = [
   'Laia', 'Clàudia', 'Marina', 'Júlia', 'Aina', 'Carla', 'Marta', 'Núria', 'Anna', 'Eva',
   'Sònia', 'Ivet', 'Ona', 'Mireia', 'Cristina', 'Laura', 'Gemma', 'Neus', 'Sara', 'Txell',
 ];
@@ -50,6 +53,7 @@ export function entre(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function nomAleatori(): string {
-  return `${aleatori(NOMS)} ${aleatori(COGNOMS)}`;
+export function nomAleatori(genere?: 'm' | 'f'): string {
+  const llista = genere === 'm' ? NOMS_MASCULINS : genere === 'f' ? NOMS_FEMENINS : (Math.random() < 0.5 ? NOMS_MASCULINS : NOMS_FEMENINS);
+  return `${aleatori(llista)} ${aleatori(COGNOMS)}`;
 }

@@ -40,7 +40,12 @@ function PobleAmbZoom({ p, seleccionat, onClic }: { p: PobleClicable; selecciona
     >
       <circle r={rHit} fill="transparent" className="mapa-poble-hit" />
       <circle r={rDot} className="mapa-poble-dot" vectorEffect="non-scaling-stroke" />
-      <text y={-(rDot + 4.5 / zoom)} textAnchor="middle" className="mapa-etiqueta-poble" style={{ fontSize: 5.5 / zoom }}>
+      <text
+        y={-(rDot + 4.5 / zoom)}
+        textAnchor="middle"
+        className="mapa-etiqueta-poble"
+        style={{ fontSize: 5.5 / zoom, strokeWidth: 1.2 / zoom }}
+      >
         {p.nom}
       </text>
     </g>
@@ -56,7 +61,13 @@ function MarcadorAmbZoom({ m }: { m: MarcadorMapa }) {
     <g className="mapa-marcador">
       <circle cx={m.x} cy={m.y} r={r} fill={m.color} stroke="#0b0e14" strokeWidth={0.8} vectorEffect="non-scaling-stroke" />
       {m.label && (
-        <text x={m.x} y={m.y - r - 2.5 / zoom} textAnchor="middle" className="mapa-etiqueta" style={{ fontSize: 7 / zoom }}>
+        <text
+          x={m.x}
+          y={m.y - r - 2.5 / zoom}
+          textAnchor="middle"
+          className="mapa-etiqueta"
+          style={{ fontSize: 7 / zoom, strokeWidth: 1.4 / zoom }}
+        >
           {m.label}
         </text>
       )}
@@ -73,6 +84,7 @@ export function MapaCatalunya({ comarcaSeleccionada, onSeleccionarComarca, marca
           d={c.path}
           className={`mapa-comarca ${comarcaSeleccionada === c.name ? 'sel' : ''} ${onSeleccionarComarca ? 'clicable' : ''}`}
           onClick={onSeleccionarComarca ? () => onSeleccionarComarca(c.name) : undefined}
+          vectorEffect="non-scaling-stroke"
         >
           <title>{c.name}</title>
         </path>

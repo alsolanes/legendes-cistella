@@ -676,7 +676,7 @@ button {
 .mapa-comarca.clicable { cursor: pointer; }
 .mapa-comarca.clicable:hover { fill: rgba(255, 140, 66, 0.35); }
 .mapa-comarca.sel { fill: var(--taronja); }
-.mapa-etiqueta { fill: var(--text); font-size: 7px; font-weight: 700; paint-order: stroke; stroke: var(--fons); stroke-width: 1.5px; }
+.mapa-etiqueta { fill: var(--text); font-weight: 700; paint-order: stroke; stroke: var(--fons); stroke-width: 1.5px; }
 
 /* Pobles clicables al mapa */
 .mapa-poble { cursor: pointer; }
@@ -685,11 +685,11 @@ button {
 .mapa-poble:hover .mapa-poble-dot { fill: #ffb27a; }
 .mapa-poble.sel .mapa-poble-dot { fill: var(--verd); r: 3.4; }
 .mapa-etiqueta-poble {
-  fill: var(--text); font-size: 5.5px; font-weight: 700;
+  fill: var(--text); font-weight: 700;
   paint-order: stroke; stroke: var(--fons); stroke-width: 1.6px;
   opacity: 0.85;
 }
-.mapa-poble:hover .mapa-etiqueta-poble { opacity: 1; font-size: 6.5px; }
+.mapa-poble:hover .mapa-etiqueta-poble { opacity: 1; }
 
 /* Botons de zoom */
 .mapa-zoom-botons {

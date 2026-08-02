@@ -3,10 +3,16 @@
 Totes les imatges es van generar amb `scripts/genera-imatges.mjs` i es van comprimir a WebP
 (qualitat 78-82, redimensionades) per mantenir el pes total per sota d'1 MB.
 
-## Avatars de jugadors (12)
-`avatar-m1.webp` … `avatar-m6.webp` — retrats masculins.
-`avatar-f1.webp` … `avatar-f6.webp` — retrats femenins.
-Assignats pseudoaleatòriament a cada jugador generat (`src/game/generador.ts`, `avatarPerIndex`).
+## Avatars de jugadors (18)
+`avatar-m1.webp` … `avatar-m6.webp` i `avatar-m7.webp` … `avatar-m9.webp` — retrats masculins.
+`avatar-f1.webp` … `avatar-f6.webp` i `avatar-f7.webp` … `avatar-f9.webp` — retrats femenins.
+Els 6 darrers (`m7-m9`, `f7-f9`, generats amb `scripts/genera-avatars-extra.mjs`) afegeixen
+variabilitat d'aspecte: calb, cabells llargs (con o solts), barba, cap rapat i afro.
+
+Assignats a cada jugador generat (`src/game/generador.ts`, `avatarPerIndex`). En incorporar-se
+a la plantilla (fitxatge, cantera) es reassigna amb `avatarUnicPer` perquè no coincideixi amb
+cap company d'equip actual. Des de la fitxa del jugador a `Plantilla.tsx` es pot prémer
+"Regenera avatar" per triar-ne un altre amb `avatarDiferentA`.
 
 ## Art de cromos (3)
 `cromo-comu.webp`, `cromo-rara.webp`, `cromo-epica.webp` — fons segons raresa del cromo

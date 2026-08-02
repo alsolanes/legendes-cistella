@@ -1,9 +1,11 @@
+import { ArrowLeft } from 'lucide-react';
 import { useJoc } from '../game/store';
 import { MapaCatalunya, MarcadorMapa } from './MapaCatalunya';
 import { getTownPointFlexible } from '../utils/catalunyaMap';
 
 export function Mapa() {
   const partida = useJoc((s) => s.partida);
+  const setPestanya = useJoc((s) => s.setPestanya);
   if (!partida) return null;
 
   const marcadors: MarcadorMapa[] = [];
@@ -17,6 +19,10 @@ export function Mapa() {
 
   return (
     <>
+      <button className="btn btn-secundari" style={{ marginBottom: 12 }} onClick={() => setPestanya('tauler')}>
+        <ArrowLeft size={16} /> Tornar al tauler
+      </button>
+
       <div className="card">
         <div className="card-titol">
           <span>Mapa del club</span>

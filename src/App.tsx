@@ -29,6 +29,12 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Torna a dalt en canviar de pestanya o en començar/tancar una partida, perquè la
+  // capçalera i el contingut nou no quedin amagats per un scroll heretat de la pantalla anterior.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pestanya, !!partida]);
+
   if (!partida) {
     return <NovaPartida />;
   }

@@ -17,6 +17,24 @@ function avatarPerIndex(): string {
   return AVATARS[seq % AVATARS.length];
 }
 
+/** Avatar per a un jugador que s'incorpora a una plantilla (fitxatge, cantera): evita repetir
+ * l'avatar d'algú que ja hi és, perquè cada fitxa de l'equip es distingeixi a cop d'ull. */
+export function avatarUnicPer(plantilla: Jugador[]): string {
+  const usats = new Set(plantilla.map((j) => j.avatar));
+  return AVATARS.find((a) => !usats.has(a)) ?? avatarPerIndex();
+}
+
+/** Avatar diferent de l'actual per al botó "Regenera avatar": prioritza un que ningú més
+ * de la plantilla tingui, si no n'hi ha cap de lliure en tria un de diferent a l'actual igualment. */
+export function avatarDiferentA(plantilla: Jugador[], jugadorId: string): string {
+  const actual = plantilla.find((j) => j.id === jugadorId)?.avatar;
+  const usatsPerAltres = new Set(plantilla.filter((j) => j.id !== jugadorId).map((j) => j.avatar));
+  const lliures = AVATARS.filter((a) => a !== actual && !usatsPerAltres.has(a));
+  if (lliures.length > 0) return aleatori(lliures);
+  const diferents = AVATARS.filter((a) => a !== actual);
+  return aleatori(diferents.length > 0 ? diferents : AVATARS);
+}
+
 export function mitjana(atributs: Atributs): number {
   return Math.round((atributs.anotacio + atributs.triple + atributs.defensa + atributs.rebot + atributs.velocitat + atributs.resistencia) / 6);
 }

@@ -1,4 +1,4 @@
-import { ClipboardList, Plane, CheckCircle2, AlertTriangle, Newspaper } from 'lucide-react';
+import { ClipboardList, Plane, CheckCircle2, AlertTriangle, Newspaper, Map } from 'lucide-react';
 import { useJoc } from '../game/store';
 import { IconPavello, IconPilota } from './icones';
 
@@ -113,6 +113,9 @@ export function Tauler() {
                   {rival?.ciutat} · Nivell {rival?.nivell} · {filaRival ? `${filaRival.guanyats}V-${filaRival.perduts}D` : ''}
                 </div>
               </div>
+              <button className="btn btn-secundari" style={{ padding: '6px 10px', fontSize: 12, flexShrink: 0 }} onClick={() => setPestanya('mapa')}>
+                <Map size={14} /> Mapa
+              </button>
             </div>
           </div>
         );

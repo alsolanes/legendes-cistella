@@ -6,7 +6,7 @@ import {
   crearPartida, jugarJornada, recuperacioSetmanal, temporadaAcabada, novaTemporada,
   aplicarBonusPartit, posicioUsuari, sanejarAlineacio, NovaPartidaConfig, TOTAL_JORNADES,
 } from './temporada';
-import { mitjana, generarMercat } from './generador';
+import { mitjana, generarMercat, avatarUnicPer, avatarDiferentA } from './generador';
 import { afegirXp, afegirTitol, registrarTemporada, capturarLlegendes, XP_GUANYAR, XP_PERDRE, XP_JUGAR_BE, XP_TITOL, Perk } from './llegat';
 import { generarSobre, afegirCromosAColleccio, PREU_SOBRE, xpAleatoriaSobre } from './cromos';
 import { aplicarEntrenament, SESSIONS_PER_SETMANA } from './entrenament';
@@ -91,6 +91,7 @@ interface JocState {
   millorarInstalacions: () => boolean;
   renovar: (id: string) => void;
   vendreJugador: (id: string) => void;
+  regenerarAvatar: (id: string) => void;
   pujarCantera: (id: string) => boolean;
   vendreCantera: (id: string) => void;
   entrenar: (tipus: TipusSessio, participantIds: string[]) => boolean;
@@ -227,7 +228,7 @@ export const useJoc = create<JocState>()(
         const { partida } = get();
         if (!partida || partida.plantilla.length >= 14) return false;
         if (partida.finanzas.pressupost < sou) return false;
-        const fitxat = { ...jugador, sou, contracteAnys: 2 };
+        const fitxat = { ...jugador, sou, contracteAnys: 2, avatar: avatarUnicPer(partida.plantilla) };
         set({
           partida: {
             ...partida,
@@ -247,7 +248,7 @@ export const useJoc = create<JocState>()(
         if (partida.finanzas.pressupost < preu) return false;
         let p: Partida = {
           ...partida,
-          plantilla: [...partida.plantilla, { ...jugador, contracteAnys: 2 }],
+          plantilla: [...partida.plantilla, { ...jugador, contracteAnys: 2, avatar: avatarUnicPer(partida.plantilla) }],
           mercat: partida.mercat.filter((j) => j.id !== id),
           finanzas: { ...partida.finanzas, pressupost: partida.finanzas.pressupost - preu, despesesTemporada: partida.finanzas.despesesTemporada + preu },
         };
@@ -319,6 +320,18 @@ export const useJoc = create<JocState>()(
         set({ partida: sanejarAlineacio(base) });
       },
 
+      regenerarAvatar: (id) => {
+        const { partida } = get();
+        if (!partida) return;
+        const nouAvatar = avatarDiferentA(partida.plantilla, id);
+        set({
+          partida: {
+            ...partida,
+            plantilla: partida.plantilla.map((j) => (j.id === id ? { ...j, avatar: nouAvatar } : j)),
+          },
+        });
+      },
+
       pujarCantera: (id) => {
         const { partida } = get();
         if (!partida || partida.plantilla.length >= 14) return false;
@@ -327,7 +340,7 @@ export const useJoc = create<JocState>()(
         set({
           partida: {
             ...partida,
-            plantilla: [...partida.plantilla, { ...jove, contracteAnys: 3 }],
+            plantilla: [...partida.plantilla, { ...jove, contracteAnys: 3, avatar: avatarUnicPer(partida.plantilla) }],
             cantera: partida.cantera.filter((j) => j.id !== id),
           },
           toasts: [...get().toasts, { id: uid(), text: `${jove.nom} ${jove.cognom} puja al primer equip!`, icona: 'cantera' as const }],

@@ -1,17 +1,18 @@
-import { LayoutDashboard, Calendar, Dumbbell, Wallet, Beer, BookOpen, Map } from 'lucide-react';
+import { LayoutDashboard, Calendar, Dumbbell, Wallet, Beer, BookOpen } from 'lucide-react';
 import { useJoc } from '../game/store';
 import { IconPilota, IconTitul } from './icones';
 
+/** Ordenades per prioritat d'ús: primer el nucli de joc (tauler/partit/plantilla/entrenament),
+ * després la gestió del club (finances/jocs/cromos/llegat). El Mapa viu dins de Tauler. */
 const PESTANYES = [
   { id: 'tauler', etiqueta: 'Tauler', Icona: LayoutDashboard },
-  { id: 'plantilla', etiqueta: 'Plantilla', Icona: IconPilota },
   { id: 'partit', etiqueta: 'Partit', Icona: Calendar },
+  { id: 'plantilla', etiqueta: 'Plantilla', Icona: IconPilota },
   { id: 'entrenament', etiqueta: 'Entrenament', Icona: Dumbbell },
   { id: 'finances', etiqueta: 'Finances', Icona: Wallet },
   { id: 'jocs', etiqueta: 'Jocs', Icona: Beer },
   { id: 'cromos', etiqueta: 'Cromos', Icona: BookOpen },
   { id: 'llegat', etiqueta: 'Llegat', Icona: IconTitul },
-  { id: 'mapa', etiqueta: 'Mapa', Icona: Map },
 ];
 
 export function Pestanyes() {

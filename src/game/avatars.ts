@@ -11,5 +11,14 @@ import f3 from '../assets/avatar-f3.webp';
 import f4 from '../assets/avatar-f4.webp';
 import f5 from '../assets/avatar-f5.webp';
 import f6 from '../assets/avatar-f6.webp';
+import m7 from '../assets/avatar-m7.webp';
+import m8 from '../assets/avatar-m8.webp';
+import m9 from '../assets/avatar-m9.webp';
+import f7 from '../assets/avatar-f7.webp';
+import f8 from '../assets/avatar-f8.webp';
+import f9 from '../assets/avatar-f9.webp';
 
-export const AVATARS: string[] = [m1, f1, m2, f2, m3, f3, m4, f4, m5, f5, m6, f6];
+export const AVATARS: string[] = [
+  m1, f1, m2, f2, m3, f3, m4, f4, m5, f5, m6, f6,
+  m7, f7, m8, f8, m9, f9,
+];

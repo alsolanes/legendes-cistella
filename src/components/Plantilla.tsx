@@ -13,6 +13,7 @@ import {
   X,
   RefreshCw,
   DoorOpen,
+  Shuffle,
 } from 'lucide-react';
 import { IconPilota } from './icones';
 import { useJoc } from '../game/store';
@@ -67,7 +68,7 @@ export function Plantilla() {
   const setTitulars = useJoc((s) => s.setTitulars);
   const setEsquema = useJoc((s) => s.setEsquema);
   const setPressing = useJoc((s) => s.setPressing);
-  const [detall, setDetall] = useState<Jugador | null>(null);
+  const [detallId, setDetallId] = useState<string | null>(null);
   const [vista, setVista] = useState<'equip' | 'mercat' | 'cantera'>('equip');
   if (!partida) return null;
 
@@ -187,7 +188,7 @@ export function Plantilla() {
                     key={j.id}
                     className={`jugador-pista titular ${j.estat !== 'actiu' ? 'lesionat' : ''}`}
                     style={{ left: `${pos.x}%`, top: `${pos.y}%`, background: j.estat !== 'actiu' ? '#555' : `linear-gradient(135deg, ${partida.colorPrincipal}, ${partida.colorSecundari})` }}
-                    onClick={() => setDetall(j)}
+                    onClick={() => setDetallId(j.id)}
                   >
                     <span className="inicials">{j.nom.slice(0, 1)}{j.cognom.slice(0, 1)}</span>
                     <span className="pos-etiqueta">{INICIALS_POS[j.posicio]} · {força}</span>
@@ -210,7 +211,7 @@ export function Plantilla() {
                 key={j.id}
                 jugador={j}
                 colorPrincipal={partida.colorPrincipal}
-                onClick={() => setDetall(j)}
+                onClick={() => setDetallId(j.id)}
                 accio={<button className="btn btn-secundari" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => ferTitular(j)}>Titular</button>}
               />
             ))}
@@ -233,7 +234,7 @@ export function Plantilla() {
                         key={j.id}
                         jugador={j}
                         colorPrincipal={partida.colorPrincipal}
-                        onClick={() => setDetall(j)}
+                        onClick={() => setDetallId(j.id)}
                         esTitular={esTitular}
                         accio={
                           esTitular
@@ -254,7 +255,10 @@ export function Plantilla() {
       {vista === 'cantera' && <Cantera teOjeador={teOjeador} />}
 
       {/* Modal detall */}
-      {detall && <DetallJugador jugador={detall} onClose={() => setDetall(null)} />}
+      {detallId && (() => {
+        const jugadorDetall = partida.plantilla.find((j) => j.id === detallId);
+        return jugadorDetall ? <DetallJugador jugador={jugadorDetall} colorPrincipal={partida.colorPrincipal} onClose={() => setDetallId(null)} /> : null;
+      })()}
     </>
   );
 }
@@ -357,10 +361,12 @@ function JugadorFila({ jugador, onClick, accio, esTitular, colorPrincipal }: {
   );
 }
 
-function DetallJugador({ jugador, onClose }: { jugador: Jugador; onClose: () => void }) {
+function DetallJugador({ jugador, colorPrincipal, onClose }: { jugador: Jugador; colorPrincipal: string; onClose: () => void }) {
   const acomiadar = useJoc((s) => s.acomiadar);
   const renovar = useJoc((s) => s.renovar);
   const vendre = useJoc((s) => s.vendreJugador);
+  const regenerarAvatar = useJoc((s) => s.regenerarAvatar);
+  const [regenerant, setRegenerant] = useState(false);
 
   const atributs: Array<[string, number]> = [
     ['Anotació', jugador.atributs.anotacio],
@@ -372,12 +378,27 @@ function DetallJugador({ jugador, onClose }: { jugador: Jugador; onClose: () => 
   ];
   const valor = Math.round(jugador.sou * 2.2);
 
+  const ferRegenerar = () => {
+    regenerarAvatar(jugador.id);
+    navigator.vibrate?.(15);
+    setRegenerant(true);
+    setTimeout(() => setRegenerant(false), 350);
+  };
+
   return (
     <div className="modal-fons" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <h2 style={{ fontSize: 18 }}>{jugador.nom} {jugador.cognom}</h2>
           <button className="btn btn-secundari" style={{ padding: '6px 10px' }} onClick={onClose}><X size={20} /></button>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+          <div className={regenerant ? 'avatar-regenerant' : ''}>
+            <AvatarJugador jugador={jugador} mida={64} background={`linear-gradient(135deg, ${colorPrincipal}, #00000066)`} />
+          </div>
+          <button className="btn btn-secundari" style={{ padding: '7px 12px', fontSize: 12.5 }} onClick={ferRegenerar}>
+            <Shuffle size={14} /> Regenera avatar
+          </button>
         </div>
         <div className="jugador-sub" style={{ marginBottom: 8 }}>
           {jugador.posicio} · {jugador.edat} anys · {jugador.nacionalitat} · Contracte: {jugador.contracteAnys} any(s)

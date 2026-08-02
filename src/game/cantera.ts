@@ -1,6 +1,7 @@
 // ── Cantera: joves promeses del planter ──────────────────────────
 import { JugadorCantera, Posicio } from './types';
 import { aleatori, entre, nomAleatori } from './dades';
+import { AVATARS } from './avatars';
 
 let seq = 0;
 function uid(prefix: string): string {
@@ -52,6 +53,7 @@ export function generarCantera(nivellClub: number, posicioLliga?: number): Jugad
       rebots: 0,
       assistencies: 0,
       potencial,
+      avatar: AVATARS[seq % AVATARS.length],
     });
   }
   return resultat;

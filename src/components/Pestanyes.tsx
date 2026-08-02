@@ -1,15 +1,17 @@
+import { LayoutDashboard, Calendar, Dumbbell, Wallet, Beer, BookOpen, Map } from 'lucide-react';
 import { useJoc } from '../game/store';
+import { IconPilota, IconTitul } from './icones';
 
 const PESTANYES = [
-  { id: 'tauler', etiqueta: '📊 Tauler' },
-  { id: 'plantilla', etiqueta: '🏀 Plantilla' },
-  { id: 'partit', etiqueta: '📅 Partit' },
-  { id: 'entrenament', etiqueta: '🏋️ Entrenament' },
-  { id: 'finances', etiqueta: '💰 Finances' },
-  { id: 'jocs', etiqueta: '🍻 Jocs' },
-  { id: 'cromos', etiqueta: '📖 Cromos' },
-  { id: 'llegat', etiqueta: '🎖️ Llegat' },
-  { id: 'mapa', etiqueta: '🗺️ Mapa' },
+  { id: 'tauler', etiqueta: 'Tauler', Icona: LayoutDashboard },
+  { id: 'plantilla', etiqueta: 'Plantilla', Icona: IconPilota },
+  { id: 'partit', etiqueta: 'Partit', Icona: Calendar },
+  { id: 'entrenament', etiqueta: 'Entrenament', Icona: Dumbbell },
+  { id: 'finances', etiqueta: 'Finances', Icona: Wallet },
+  { id: 'jocs', etiqueta: 'Jocs', Icona: Beer },
+  { id: 'cromos', etiqueta: 'Cromos', Icona: BookOpen },
+  { id: 'llegat', etiqueta: 'Llegat', Icona: IconTitul },
+  { id: 'mapa', etiqueta: 'Mapa', Icona: Map },
 ];
 
 export function Pestanyes() {
@@ -24,7 +26,7 @@ export function Pestanyes() {
           className={`tab ${pestanya === p.id ? 'activa' : ''}`}
           onClick={() => setPestanya(p.id)}
         >
-          {p.etiqueta}
+          <p.Icona size={16} /> {p.etiqueta}
         </button>
       ))}
     </nav>

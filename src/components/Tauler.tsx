@@ -1,4 +1,6 @@
+import { ClipboardList, Plane, CheckCircle2, AlertTriangle, Newspaper } from 'lucide-react';
 import { useJoc } from '../game/store';
+import { IconPavello, IconPilota } from './icones';
 
 export function Tauler() {
   const partida = useJoc((s) => s.partida);
@@ -30,7 +32,7 @@ export function Tauler() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn btn-secundari" style={{ flex: 1 }} onClick={() => setPestanya('partit')}>
-              📋 Crònica
+              <ClipboardList size={16} /> Crònica
             </button>
           </div>
         </div>
@@ -91,14 +93,20 @@ export function Tauler() {
           <div className="card">
             <div className="card-titol">
               <span>Pròxim partit · J{partida.jornadaActual + 1}</span>
-              <span>{esLocal ? '🏟 A casa' : '✈️ Fora'}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                {esLocal ? <><IconPavello size={16} /> A casa</> : <><Plane size={16} /> Fora</>}
+              </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px 0' }}>
-              <div
-                style={{ width: 44, height: 44, borderRadius: 12, background: rival?.color, display: 'grid', placeItems: 'center', fontWeight: 800 }}
-              >
-                {rival?.nom.slice(0, 2).toUpperCase()}
-              </div>
+              {rival?.escut ? (
+                <img src={rival.escut} alt="" style={{ width: 44, height: 44, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }} />
+              ) : (
+                <div
+                  style={{ width: 44, height: 44, borderRadius: 12, background: rival?.color, display: 'grid', placeItems: 'center', fontWeight: 800, flexShrink: 0 }}
+                >
+                  {rival?.nom.slice(0, 2).toUpperCase()}
+                </div>
+              )}
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700 }}>{esLocal ? `${partida.clubNom} vs ${rival?.nom}` : `${rival?.nom} vs ${partida.clubNom}`}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
@@ -117,7 +125,9 @@ export function Tauler() {
           {partida.noticies.slice(-4).reverse().map((n) => (
             <div key={n.id} className="noticia">
               <div className="noticia-titol">
-                <span className="emoji">{n.tipus === 'positiu' ? '✅' : n.tipus === 'negatiu' ? '⚠️' : '📰'}</span>
+                <span className="emoji">
+                  {n.tipus === 'positiu' ? <CheckCircle2 size={16} /> : n.tipus === 'negatiu' ? <AlertTriangle size={16} /> : <Newspaper size={16} />}
+                </span>
                 {n.titol}
               </div>
               <div className="noticia-text">{n.text}</div>
@@ -144,7 +154,7 @@ export function Tauler() {
       {!acabada && (
         <div className="jugar-flotant">
           <button className="btn btn-primari" onClick={jugar}>
-            🏀 Jugar jornada {partida.jornadaActual + 1}
+            <IconPilota size={18} /> Jugar jornada {partida.jornadaActual + 1}
           </button>
           <span className="hint-jornada">
             {posMeu > 0 ? `Ocupes la ${posMeu}º posició amb ${filaMeu?.guanyats} victòries` : ''}

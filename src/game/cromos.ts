@@ -23,6 +23,7 @@ export function cromoDeJugador(j: Jugador): Cromo {
     rareza: raresaDe(m),
     mitjana: m,
     especial: false,
+    avatar: j.avatar,
   };
 }
 
@@ -38,6 +39,7 @@ export function cromoEspecialDe(rival: Rival): Cromo {
     mitjana: m,
     especial: true,
     clubOrigen: rival.nom,
+    avatar: estrella.avatar,
   };
 }
 

@@ -1,5 +1,7 @@
 import { useJoc } from '../game/store';
 import { calcularLuxuryTaxSetmanal, calcularSalaryCap, massaSalarialTotal } from '../game/contractes';
+import { AlertTriangle, Dumbbell, Flame, LifeBuoy } from 'lucide-react';
+import { IconPavello, IconTitul } from './icones';
 
 export function Finances() {
   const partida = useJoc((s) => s.partida);
@@ -64,10 +66,14 @@ export function Finances() {
             disabled={f.pressupost < costPavello}
             style={{ opacity: f.pressupost < costPavello ? 0.5 : 1 }}
           >
-            🏟 Millorar pavelló ({costPavello.toLocaleString('ca')}€) → Nivell {partida.pavello.nivell + 1}
+            <IconPavello size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            Millorar pavelló ({costPavello.toLocaleString('ca')}€) → Nivell {partida.pavello.nivell + 1}
           </button>
         ) : (
-          <div style={{ textAlign: 'center', color: 'var(--verd)', fontWeight: 700 }}>🏟 Pavelló al màxim nivell!</div>
+          <div style={{ textAlign: 'center', color: 'var(--verd)', fontWeight: 700 }}>
+            <IconPavello size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            Pavelló al màxim nivell!
+          </div>
         )}
       </div>
 
@@ -89,10 +95,14 @@ export function Finances() {
             disabled={f.pressupost < costInstalacions}
             style={{ opacity: f.pressupost < costInstalacions ? 0.5 : 1 }}
           >
-            🏋️ Millorar instal·lacions ({costInstalacions.toLocaleString('ca')}€) → Nivell {partida.instalacions.nivell + 1}
+            <Dumbbell size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            Millorar instal·lacions ({costInstalacions.toLocaleString('ca')}€) → Nivell {partida.instalacions.nivell + 1}
           </button>
         ) : (
-          <div style={{ textAlign: 'center', color: 'var(--verd)', fontWeight: 700 }}>🏋️ Instal·lacions al màxim nivell!</div>
+          <div style={{ textAlign: 'center', color: 'var(--verd)', fontWeight: 700 }}>
+            <Dumbbell size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            Instal·lacions al màxim nivell!
+          </div>
         )}
       </div>
 
@@ -107,7 +117,8 @@ export function Finances() {
         </div>
         {tax > 0 && (
           <div style={{ fontSize: 12, color: 'var(--vermell)', marginTop: 4, fontWeight: 700 }}>
-            ⚠️ Pagues {tax.toLocaleString('ca')}€/jornada d&apos;impost de luxe per superar el sostre
+            <AlertTriangle size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            Pagues {tax.toLocaleString('ca')}€/jornada d&apos;impost de luxe per superar el sostre
           </div>
         )}
       </div>
@@ -116,9 +127,15 @@ export function Finances() {
       <div className="card">
         <div className="card-titol"><span>Objectiu de temporada</span></div>
         <div style={{ fontSize: 14 }}>
-          {partida.objectiuTemporada === 'permanencia' && '🛟 Permanència: acabar entre els 10 primers.'}
-          {partida.objectiuTemporada === 'playoffs' && '🔥 Playoffs: acabar entre els 6 primers.'}
-          {partida.objectiuTemporada === 'titulo' && '🏆 Títol: quedar campió de la lliga.'}
+          {partida.objectiuTemporada === 'permanencia' && (
+            <><LifeBuoy size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />Permanència: acabar entre els 10 primers.</>
+          )}
+          {partida.objectiuTemporada === 'playoffs' && (
+            <><Flame size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />Playoffs: acabar entre els 6 primers.</>
+          )}
+          {partida.objectiuTemporada === 'titulo' && (
+            <><IconTitul size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />Títol: quedar campió de la lliga.</>
+          )}
         </div>
       </div>
     </>

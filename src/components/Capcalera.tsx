@@ -1,4 +1,5 @@
 import { useJoc } from '../game/store';
+import fonsCapcalera from '../assets/fons-capcalera.webp';
 
 export function Capcalera() {
   const partida = useJoc((s) => s.partida);
@@ -8,7 +9,13 @@ export function Capcalera() {
   const pos = filaMeu ? partida.classificacio.indexOf(filaMeu) + 1 : -1;
 
   return (
-    <header className="cap">
+    <header
+      className="cap"
+      style={{
+        backgroundImage: `linear-gradient(rgba(11,14,20,0.72), rgba(11,14,20,0.72)), url(${fonsCapcalera})`,
+        backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 14,
+      }}
+    >
       <div className="cap-esq">
         <div
           className="cap-logo"

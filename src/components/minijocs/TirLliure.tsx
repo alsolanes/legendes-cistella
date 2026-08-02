@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Target, XCircle } from 'lucide-react';
 import { BarraPotencia } from './BarraPotencia';
+import { IconCistella } from '../icones';
 
 export function TirLliure({ onFinish }: { onFinish: (encerts: number) => void }) {
   const [tir, setTir] = useState(1);
@@ -22,11 +24,15 @@ export function TirLliure({ onFinish }: { onFinish: (encerts: number) => void })
 
   return (
     <div className="minijoc">
-      <div className="minijoc-titol">🎯 Tir lliure · {tir}/2</div>
+      <div className="minijoc-titol" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Target size={18} /> Tir lliure · {tir}/2</div>
       <div className="minijoc-sub">Para la barra dins la zona verda per encistellar</div>
       {ultimResultat === null
         ? <BarraPotencia key={tir} dificultat={8} onResultat={resoldre} />
-        : <div className={`minijoc-resultat ${ultimResultat ? 'encert' : 'fallat'}`}>{ultimResultat ? '🏀 DINS!' : '❌ Fora!'}</div>}
+        : (
+          <div className={`minijoc-resultat ${ultimResultat ? 'encert' : 'fallat'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            {ultimResultat ? <IconCistella size={20} /> : <XCircle size={20} />} {ultimResultat ? 'DINS!' : 'Fora!'}
+          </div>
+        )}
     </div>
   );
 }

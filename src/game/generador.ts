@@ -3,11 +3,18 @@ import { Atributs, Jugador, Posicio, Rival } from './types';
 import { aleatori, entre, nomAleatori, POBLES, NOMS_RIVALS, CIUTATS_RIVALS } from './dades';
 import { getTownPointFlexible } from '../utils/catalunyaMap';
 import { CATALUNYA_TOWN_POINTS } from '../data/catalunyaTownPoints';
+import { AVATARS } from './avatars';
+import { ESCUTS } from './escuts';
 
 let seq = 0;
 function uid(prefix: string): string {
   seq += 1;
   return `${prefix}-${Date.now().toString(36)}-${seq}`;
+}
+
+/** Assigna un avatar de forma pseudoaleatòria però determinista (basada en el comptador de generació, no Math.random) */
+function avatarPerIndex(): string {
+  return AVATARS[seq % AVATARS.length];
 }
 
 export function mitjana(atributs: Atributs): number {
@@ -80,6 +87,7 @@ export function generarJugador(nivell: number, posicio?: Posicio): Jugador {
     rebots: 0,
     assistencies: 0,
     potencial,
+    avatar: avatarPerIndex(),
   };
 }
 
@@ -123,6 +131,7 @@ export function generarRival(nom: string, nivell: number, ciutat?: string): Riva
     colorSecundari: sec,
     nivell,
     plantilla,
+    escut: ESCUTS[seq % ESCUTS.length],
   };
 }
 

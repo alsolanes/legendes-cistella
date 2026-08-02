@@ -1,6 +1,8 @@
 import { useJoc } from '../game/store';
 import { nomEquipPlayoff, nomRonda } from '../game/playoffs';
 import { NomRondaPlayoff } from '../game/types';
+import { RefreshCw } from 'lucide-react';
+import { IconPilota, IconTitul } from './icones';
 
 const ORDRE_RONDES: NomRondaPlayoff[] = ['quarts', 'semis', 'final'];
 
@@ -17,13 +19,13 @@ export function Playoffs() {
 
   return (
     <div className="card" style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: 40 }}>🏆</div>
+      <div style={{ display: 'flex', justifyContent: 'center' }}><IconTitul size={40} /></div>
       <h2 style={{ fontSize: 18, margin: '4px 0 12px' }}>Playoffs</h2>
 
       {acabats ? (
         <>
           <div style={{ fontSize: 22, fontWeight: 900, color: jocEsCampio ? 'var(--groc)' : 'var(--text)' }}>
-            {jocEsCampio ? '🏆 Sou els campions!' : `Campió: ${campio}`}
+            {jocEsCampio ? <><IconTitul size={20} style={{ verticalAlign: 'middle', marginRight: 6 }} />Sou els campions!</> : `Campió: ${campio}`}
           </div>
           {po.meuEliminat && !jocEsCampio && (
             <div style={{ fontSize: 13, color: 'var(--text-dim)', margin: '8px 0' }}>Heu quedat eliminats aquesta eliminatòria.</div>
@@ -57,11 +59,13 @@ export function Playoffs() {
 
       {!acabats ? (
         <button className="btn btn-primari btn-blok" style={{ marginTop: 14 }} onClick={jugarPlayoff}>
-          🏀 Jugar {nomRonda(po.rondaActual).toLowerCase()}
+          <IconPilota size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+          Jugar {nomRonda(po.rondaActual).toLowerCase()}
         </button>
       ) : (
         <button className="btn btn-primari btn-blok" style={{ marginTop: 14 }} onClick={novaTemporadaClub}>
-          🔄 Continuar a la següent temporada
+          <RefreshCw size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+          Continuar a la següent temporada
         </button>
       )}
     </div>

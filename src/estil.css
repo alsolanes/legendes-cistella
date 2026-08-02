@@ -52,7 +52,8 @@ button {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  padding: 10px 4px 14px;
+  padding: 14px 12px;
+  margin-bottom: 4px;
 }
 
 .cap-esq { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -82,6 +83,10 @@ button {
 .tab {
   flex: 1;
   min-width: max-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 9px 12px;
   border-radius: 11px;
   font-size: 13px;
@@ -178,6 +183,7 @@ button {
   flex-shrink: 0;
   background: var(--fons-card);
   border: 2px solid var(--vora);
+  object-fit: cover;
 }
 .jugador-info { flex: 1; min-width: 0; }
 .jugador-nom { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; }
@@ -479,8 +485,8 @@ button {
 .minijoc-titol { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
 .minijoc-sub { font-size: 12.5px; color: var(--text-dim); margin-bottom: 18px; }
 .minijoc-resultat { font-size: 22px; font-weight: 900; padding: 34px 0; }
-.minijoc-resultat.encert { color: var(--verd); }
-.minijoc-resultat.fallat { color: var(--vermell); }
+.encert { color: var(--verd); }
+.fallat { color: var(--vermell); }
 
 .barra-potencia-wrap { display: flex; flex-direction: column; gap: 16px; }
 .barra-potencia { position: relative; height: 22px; border-radius: 11px; background: var(--fons-elevat); border: 1px solid var(--vora); }
@@ -555,13 +561,14 @@ button {
 .cromo.èpic { border-color: #c77dff; box-shadow: 0 0 12px rgba(199, 125, 255, 0.28); }
 .cromo.llegendari { border-color: var(--groc); box-shadow: 0 0 16px rgba(255, 209, 102, 0.38); }
 .cromo.buit { opacity: 0.32; }
-.cromo.especial::before { content: '⭐'; position: absolute; top: 4px; left: 6px; font-size: 11px; }
+.cromo-especial-marca { position: absolute; top: 5px; left: 6px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
 .cromo-foto {
   width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 8px;
   display: grid; place-items: center; font-weight: 800; font-size: 16px; background: var(--fons-card);
+  object-fit: cover; border: 2px solid rgba(255,255,255,0.5);
 }
-.cromo-nom { font-size: 10.5px; font-weight: 700; line-height: 1.2; }
-.cromo-raresa { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); margin-top: 3px; }
+.cromo-nom { font-size: 10.5px; font-weight: 700; line-height: 1.2; text-shadow: 0 1px 3px rgba(0,0,0,0.7); }
+.cromo-raresa { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #d8ddec; margin-top: 3px; text-shadow: 0 1px 3px rgba(0,0,0,0.7); }
 .cromo-comptador {
   position: absolute; top: 5px; right: 5px; background: var(--fons-card); border: 1px solid var(--vora);
   border-radius: 20px; font-size: 10px; font-weight: 800; padding: 1px 6px;
@@ -576,7 +583,7 @@ button {
 .perk-fila { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(42, 53, 80, 0.4); }
 .perk-fila:last-child { border-bottom: none; }
 .perk-fila.blocat { opacity: 0.4; }
-.perk-emoji { font-size: 22px; width: 30px; text-align: center; flex-shrink: 0; }
+.perk-emoji { width: 30px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--taronja); }
 .perk-info strong { display: block; font-size: 13px; }
 .perk-info span { font-size: 11.5px; color: var(--text-dim); }
 .quimica-barra { height: 8px; border-radius: 4px; background: var(--fons); overflow: hidden; }

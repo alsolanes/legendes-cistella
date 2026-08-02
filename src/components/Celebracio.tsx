@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { ComponentType } from 'react';
+import { PartyPopper } from 'lucide-react';
 import { useJoc } from '../game/store';
+import { IconTitul } from './icones';
+import fonsCelebracio from '../assets/fons-celebracio.webp';
 
 const COLORS_CONFETTI = ['#ff8c42', '#5aa9ff', '#3ddc97', '#ffd166', '#ff5d73', '#c77dff'];
 
@@ -25,10 +29,10 @@ function generarPeces(n: number): Peca[] {
   }));
 }
 
-const MISSATGES: Record<string, { titol: string; emoji: string }> = {
-  victoria: { titol: 'Victòria!', emoji: '🎉' },
-  titol: { titol: 'Campions de lliga!', emoji: '🏆' },
-  campio: { titol: 'Campions dels Playoffs!', emoji: '🏆' },
+const MISSATGES: Record<string, { titol: string; Icona: ComponentType<{ size?: number | string }> }> = {
+  victoria: { titol: 'Victòria!', Icona: PartyPopper },
+  titol: { titol: 'Campions de lliga!', Icona: IconTitul },
+  campio: { titol: 'Campions dels Playoffs!', Icona: IconTitul },
 };
 
 export function Celebracio() {
@@ -68,8 +72,14 @@ export function Celebracio() {
         />
       ))}
       {info && (
-        <div className="celebracio-missatge">
-          <span className="celebracio-emoji">{info.emoji}</span>
+        <div
+          className="celebracio-missatge"
+          style={{
+            backgroundImage: `linear-gradient(rgba(11,14,20,0.72), rgba(11,14,20,0.72)), url(${fonsCelebracio})`,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+          }}
+        >
+          <span className="celebracio-emoji"><info.Icona size={42} /></span>
           <span>{info.titol}</span>
         </div>
       )}

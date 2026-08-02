@@ -1,9 +1,33 @@
-import { useState } from 'react';
+import { useState, type ComponentType } from 'react';
+import { Beer, HelpCircle, PartyPopper, Target, Footprints, Timer, User, Megaphone, Wallet, Coins, Moon, Star, Meh, Medal } from 'lucide-react';
 import { useJoc } from '../game/store';
 import {
   angleDelPremi, comprovarRasca, barallarCartesMemoria, costJoc, girarRuleta,
   PREMIS_RULETA, PremiRuleta, premiMemoria, potJugar, SIMBOLS_RASCA,
 } from '../game/jocs';
+import { IconRuleta, IconRasca, IconMemoria, IconPilota, IconCistella, IconTitul } from './icones';
+
+const ICONA_SIMBOL: Record<string, ComponentType<{ size?: number | string }>> = {
+  pilota: IconPilota,
+  cistella: IconCistella,
+  diana: Target,
+  sabatilla: Footprints,
+  trofeu: IconTitul,
+  cronometre: Timer,
+  jugador: User,
+  medalla: Medal,
+  megafon: Megaphone,
+};
+
+const ICONA_PREMI: Record<string, ComponentType<{ size?: number | string }>> = {
+  gran: Wallet,
+  mitja: Coins,
+  petit: Coins,
+  moral: PartyPopper,
+  forma: Moon,
+  xp: Star,
+  res: Meh,
+};
 
 export function Jocs() {
   const partida = useJoc((s) => s.partida);
@@ -16,7 +40,7 @@ export function Jocs() {
   return (
     <>
       <div className="card" style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 40 }}>🍻</div>
+        <div className="joc-emoji"><Beer size={18} /></div>
         <h2 style={{ fontSize: 18, margin: '4px 0 2px' }}>Bar dels Pavellons</h2>
         <p style={{ fontSize: 13, color: 'var(--text-dim)' }}>Cada joc es pot fer un cop per setmana. Prova sort!</p>
       </div>
@@ -64,7 +88,7 @@ function RuletaCard({ disponible }: { disponible: boolean }) {
 
   return (
     <div className="card joc-card">
-      <div className="joc-emoji">🎡</div>
+      <div className="joc-emoji"><IconRuleta size={18} /></div>
       <div className="card-titol" style={{ justifyContent: 'center' }}><span>Ruleta del triple</span></div>
       <div className="joc-cost">Cost: {cost.toLocaleString('ca')}€</div>
       <div className="ruleta-wrap">
@@ -72,11 +96,11 @@ function RuletaCard({ disponible }: { disponible: boolean }) {
           <div className="ruleta-agulla" />
           <div className="ruleta-disc" style={{ background: conic, transform: `rotate(${angle}deg)` }} />
         </div>
-        <div className="ruleta-resultat">
-          {girant ? 'Girant...' : premi ? `${premi.emoji} ${premi.etiqueta}` : '—'}
+        <div className="ruleta-resultat" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          {girant ? 'Girant...' : premi ? (() => { const IconaPremi = ICONA_PREMI[premi.id]; return <><IconaPremi size={16} /> {premi.etiqueta}</>; })() : '—'}
         </div>
         <button className="btn btn-primari btn-blok" onClick={girar} disabled={!disponible || girant || noPotPagar}>
-          {disponible ? '🎡 Girar' : 'Ja jugat aquesta setmana'}
+          {disponible ? <><IconRuleta size={18} /> Girar</> : 'Ja jugat aquesta setmana'}
         </button>
       </div>
     </div>
@@ -117,29 +141,32 @@ function RascaCard({ disponible }: { disponible: boolean }) {
 
   return (
     <div className="card joc-card">
-      <div className="joc-emoji">🎫</div>
+      <div className="joc-emoji"><IconRasca size={18} /></div>
       <div className="card-titol" style={{ justifyContent: 'center' }}><span>Rasca i guanya</span></div>
       <div className="joc-cost">Cost: {cost.toLocaleString('ca')}€</div>
       {!graella ? (
         <button className="btn btn-primari btn-blok" onClick={comprar} disabled={!disponible || noPotPagar}>
-          {disponible ? '🎫 Comprar rasca' : 'Ja jugat aquesta setmana'}
+          {disponible ? <><IconRasca size={18} /> Comprar rasca</> : 'Ja jugat aquesta setmana'}
         </button>
       ) : (
         <>
           <div className="rasca-graella">
-            {graella.map((s, i) => (
-              <div
-                key={i}
-                className={`rasca-cella ${revelades[i] ? 'revelada' : ''} ${resultat?.guanya && revelades[i] && s === resultat.simbolGuanyador ? 'guanyadora' : ''}`}
-                onClick={() => revelar(i)}
-              >
-                {revelades[i] ? s : '❓'}
-              </div>
-            ))}
+            {graella.map((s, i) => {
+              const IconaSimbol = ICONA_SIMBOL[s];
+              return (
+                <div
+                  key={i}
+                  className={`rasca-cella ${revelades[i] ? 'revelada' : ''} ${resultat?.guanya && revelades[i] && s === resultat.simbolGuanyador ? 'guanyadora' : ''}`}
+                  onClick={() => revelar(i)}
+                >
+                  {revelades[i] ? <IconaSimbol size={18} /> : <HelpCircle size={18} />}
+                </div>
+              );
+            })}
           </div>
           {resultat && (
-            <div className="ruleta-resultat" style={{ marginTop: 10 }}>
-              {resultat.guanya ? `🎉 Guanyes ${resultat.premi.toLocaleString('ca')}€!` : 'Sense sort aquesta vegada'}
+            <div className="ruleta-resultat" style={{ marginTop: 10, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              {resultat.guanya ? <><PartyPopper size={18} /> Guanyes {resultat.premi.toLocaleString('ca')}€!</> : 'Sense sort aquesta vegada'}
             </div>
           )}
         </>
@@ -199,27 +226,28 @@ function MemoriaCard({ disponible }: { disponible: boolean }) {
 
   return (
     <div className="card joc-card">
-      <div className="joc-emoji">🧠</div>
+      <div className="joc-emoji"><IconMemoria size={18} /></div>
       <div className="card-titol" style={{ justifyContent: 'center' }}><span>Memòria dels pavellons</span></div>
       <div className="joc-cost">Cost: {cost.toLocaleString('ca')}€</div>
       {!cartes ? (
         <button className="btn btn-primari btn-blok" onClick={comprar} disabled={!disponible || noPotPagar}>
-          {disponible ? '🧠 Jugar' : 'Ja jugat aquesta setmana'}
+          {disponible ? <><IconMemoria size={18} /> Jugar</> : 'Ja jugat aquesta setmana'}
         </button>
       ) : (
         <>
           <div className="memoria-graella">
             {cartes.map((c, i) => {
               const visible = obertes.includes(i) || trobades.includes(i);
+              const IconaCarta = ICONA_SIMBOL[c];
               return (
                 <div key={i} className={`memoria-carta ${visible ? (trobades.includes(i) ? 'trobada' : 'girada') : ''}`} onClick={() => clicar(i)}>
-                  {visible ? c : '🏀'}
+                  {visible ? <IconaCarta size={18} /> : <IconPilota size={18} />}
                 </div>
               );
             })}
           </div>
-          <div className="ruleta-resultat" style={{ marginTop: 10 }}>
-            {premiFinal !== null ? `🎉 Completat en ${intents} intents: +${premiFinal.toLocaleString('ca')}€` : `Intents: ${intents}`}
+          <div className="ruleta-resultat" style={{ marginTop: 10, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            {premiFinal !== null ? <><PartyPopper size={18} /> Completat en {intents} intents: +{premiFinal.toLocaleString('ca')}€</> : `Intents: ${intents}`}
           </div>
         </>
       )}

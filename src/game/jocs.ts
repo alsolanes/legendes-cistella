@@ -28,20 +28,19 @@ export function marcarJugat(estat: EstatSalaJocs, joc: JocSala, setmanaActual: n
 export interface PremiRuleta {
   id: string;
   etiqueta: string;
-  emoji: string;
   tipus: 'diners' | 'moral' | 'forma' | 'xp' | 'res';
   valor: number;
   probabilitat: number; // pes relatiu
 }
 
 export const PREMIS_RULETA: PremiRuleta[] = [
-  { id: 'gran', etiqueta: 'Gran premi', emoji: '💰', tipus: 'diners', valor: 12000, probabilitat: 4 },
-  { id: 'mitja', etiqueta: 'Premi', emoji: '💵', tipus: 'diners', valor: 5000, probabilitat: 14 },
-  { id: 'petit', etiqueta: 'Premiet', emoji: '🪙', tipus: 'diners', valor: 2000, probabilitat: 22 },
-  { id: 'moral', etiqueta: 'Moral de l\'equip', emoji: '🎉', tipus: 'moral', valor: 8, probabilitat: 18 },
-  { id: 'forma', etiqueta: 'Descans extra', emoji: '💤', tipus: 'forma', valor: 6, probabilitat: 18 },
-  { id: 'xp', etiqueta: 'Experiència', emoji: '⭐', tipus: 'xp', valor: 20, probabilitat: 16 },
-  { id: 'res', etiqueta: 'Res, per poc!', emoji: '😅', tipus: 'res', valor: 0, probabilitat: 8 },
+  { id: 'gran', etiqueta: 'Gran premi', tipus: 'diners', valor: 12000, probabilitat: 4 },
+  { id: 'mitja', etiqueta: 'Premi', tipus: 'diners', valor: 5000, probabilitat: 14 },
+  { id: 'petit', etiqueta: 'Premiet', tipus: 'diners', valor: 2000, probabilitat: 22 },
+  { id: 'moral', etiqueta: 'Moral de l\'equip', tipus: 'moral', valor: 8, probabilitat: 18 },
+  { id: 'forma', etiqueta: 'Descans extra', tipus: 'forma', valor: 6, probabilitat: 18 },
+  { id: 'xp', etiqueta: 'Experiència', tipus: 'xp', valor: 20, probabilitat: 16 },
+  { id: 'res', etiqueta: 'Res, per poc!', tipus: 'res', valor: 0, probabilitat: 8 },
 ];
 
 export function girarRuleta(): PremiRuleta {
@@ -62,7 +61,7 @@ export function angleDelPremi(premi: PremiRuleta): number {
 }
 
 // ── Rasca i guanya ──
-export const SIMBOLS_RASCA = ['🏀', '🧺', '🎯', '👟', '🏆', '⏱️'];
+export const SIMBOLS_RASCA = ['pilota', 'cistella', 'diana', 'sabatilla', 'trofeu', 'cronometre'];
 
 export interface ResultatRasca {
   graella: string[]; // 9 símbols
@@ -101,7 +100,7 @@ const LINIES_RASCA = [
 ];
 
 const PREMI_PER_SIMBOL: Record<string, number> = {
-  '🏀': 1500, '🧺': 2200, '🎯': 3000, '👟': 1200, '🏆': 6000, '⏱️': 1800,
+  pilota: 1500, cistella: 2200, diana: 3000, sabatilla: 1200, trofeu: 6000, cronometre: 1800,
 };
 
 export function comprovarRasca(graella: string[]): { guanya: boolean; premi: number; simbolGuanyador?: string } {
@@ -114,7 +113,7 @@ export function comprovarRasca(graella: string[]): { guanya: boolean; premi: num
 }
 
 // ── Memòria dels pavellons ──
-export const ICONES_MEMORIA = ['🏀', '🏆', '👟', '🎯', '🧺', '⛹️', '🥇', '📣'];
+export const ICONES_MEMORIA = ['pilota', 'trofeu', 'sabatilla', 'diana', 'cistella', 'jugador', 'medalla', 'megafon'];
 
 /** Baralla les 16 cartes (8 parelles) */
 export function barallarCartesMemoria(): string[] {

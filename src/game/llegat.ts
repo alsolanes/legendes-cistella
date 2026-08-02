@@ -12,15 +12,14 @@ export interface Perk {
   nivell: number;
   nom: string;
   descripcio: string;
-  emoji: string;
 }
 
 export const PERKS: Perk[] = [
-  { id: 'ojeador', nivell: 2, nom: 'Ojeador', descripcio: 'Veus el potencial amagat dels jugadors del mercat i la cantera.', emoji: '🔎' },
-  { id: 'negociador', nivell: 5, nom: 'Negociador', descripcio: 'Fitxatges i renovacions un 10% més barats.', emoji: '🤝' },
-  { id: 'tactic', nivell: 10, nom: 'Tàctic', descripcio: 'Desbloqueja l\'esquema "Zona 2-3" (defensa zonal).', emoji: '📐' },
-  { id: 'llegenda-viva', nivell: 15, nom: 'Llegenda viva', descripcio: 'El públic omple el pavelló: taquilla +20%.', emoji: '🌟' },
-  { id: 'immortal', nivell: 20, nom: 'Immortal', descripcio: 'Els jugadors es lesionen menys.', emoji: '🛡️' },
+  { id: 'ojeador', nivell: 2, nom: 'Ojeador', descripcio: 'Veus el potencial amagat dels jugadors del mercat i la cantera.' },
+  { id: 'negociador', nivell: 5, nom: 'Negociador', descripcio: 'Fitxatges i renovacions un 10% més barats.' },
+  { id: 'tactic', nivell: 10, nom: 'Tàctic', descripcio: 'Desbloqueja l\'esquema "Zona 2-3" (defensa zonal).' },
+  { id: 'llegenda-viva', nivell: 15, nom: 'Llegenda viva', descripcio: 'El públic omple el pavelló: taquilla +20%.' },
+  { id: 'immortal', nivell: 20, nom: 'Immortal', descripcio: 'Els jugadors es lesionen menys.' },
 ];
 
 /** XP acumulada necessària per assolir un nivell donat (corba creixent suau) */

@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { Star } from 'lucide-react';
 import { useJoc } from '../game/store';
 import { PartitSimulat } from '../game/types';
+import { IconPilota } from './icones';
+import fonsPavello from '../assets/fons-pavello.webp';
 
 export function Partit() {
   const partida = useJoc((s) => s.partida);
@@ -8,19 +11,20 @@ export function Partit() {
   if (!partida) return null;
 
   const darrers = partida.darrersPartits;
-  const [seleccionat, setSeleccionat] = useState<number>(darrers.length - 1);
+  const [seleccionat, setSeleccionat] = useState<number | null>(null);
 
   if (darrers.length === 0) {
     return (
       <div className="card" style={{ textAlign: 'center', padding: 40 }}>
-        <div style={{ fontSize: 40, marginBottom: 12 }}>🏀</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><IconPilota size={40} /></div>
         <p style={{ marginBottom: 16, color: 'var(--text-dim)' }}>Encara no has jugat cap partit.</p>
         <button className="btn btn-primari" onClick={jugar}>Jugar la jornada 1</button>
       </div>
     );
   }
 
-  const partit = darrers[Math.min(seleccionat, darrers.length - 1)];
+  const indexMostrat = seleccionat === null ? darrers.length - 1 : Math.min(seleccionat, darrers.length - 1);
+  const partit = darrers[indexMostrat];
   const esLocal = partit.local === partida.clubNom;
   const victoria = esLocal ? partit.puntsLocal > partit.puntsVisitant : partit.puntsVisitant > partit.puntsLocal;
   const stats = esLocal ? partit.stats.local : partit.stats.visitant;
@@ -34,7 +38,7 @@ export function Partit() {
           {darrers.map((p, i) => (
             <button
               key={p.id}
-              className={`btn ${i === seleccionat ? 'btn-primari' : 'btn-secundari'}`}
+              className={`btn ${i === indexMostrat ? 'btn-primari' : 'btn-secundari'}`}
               style={{ padding: '6px 10px', fontSize: 12, flexShrink: 0 }}
               onClick={() => setSeleccionat(i)}
             >
@@ -44,7 +48,13 @@ export function Partit() {
         </div>
       )}
 
-      <div className="card">
+      <div
+        className="card"
+        style={{
+          backgroundImage: `linear-gradient(rgba(11,14,20,0.55), rgba(26,33,51,0.9)), url(${fonsPavello})`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+        }}
+      >
         <div className="partit-cap">
           <span>Jornada {partit.jornada} · {esLocal ? 'A casa' : 'Fora'}</span>
           <span style={{ color: victoria ? 'var(--verd)' : 'var(--vermell)', fontWeight: 800 }}>
@@ -58,8 +68,8 @@ export function Partit() {
           <div className="marcador-punts visitant">{partit.puntsVisitant}</div>
           <div className="marcador-equip visitant">{partit.visitant}</div>
         </div>
-        <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)' }}>
-          ⭐ MVP: {partit.mvp}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 12, color: 'var(--text-dim)' }}>
+          <Star size={14} /> MVP: {partit.mvp}
         </div>
       </div>
 
@@ -98,7 +108,7 @@ export function Partit() {
       {partida.jornadaActual < 22 && (
         <div className="jugar-flotant">
           <button className="btn btn-primari" onClick={jugar}>
-            🏀 Jugar jornada {partida.jornadaActual + 1}
+            <IconPilota size={18} /> Jugar jornada {partida.jornadaActual + 1}
           </button>
         </div>
       )}

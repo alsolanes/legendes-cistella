@@ -9,15 +9,14 @@ export interface SessioInfo {
   tipus: TipusSessio;
   nom: string;
   descripcio: string;
-  emoji: string;
   atributs: Array<keyof Atributs>;
 }
 
 export const SESSIONS: SessioInfo[] = [
-  { tipus: 'tir', nom: 'Tir', descripcio: 'Millora l\'anotació i el triple.', emoji: '🎯', atributs: ['anotacio', 'triple'] },
-  { tipus: 'defensa', nom: 'Defensa', descripcio: 'Millora la defensa i els rebots.', emoji: '🛡️', atributs: ['defensa', 'rebot'] },
-  { tipus: 'fisic', nom: 'Físic', descripcio: 'Millora la velocitat i la resistència.', emoji: '💪', atributs: ['velocitat', 'resistencia'] },
-  { tipus: 'tactic', nom: 'Tàctic', descripcio: 'Millora una mica de tot: la intel·ligència de joc.', emoji: '📋', atributs: ['anotacio', 'defensa', 'velocitat'] },
+  { tipus: 'tir', nom: 'Tir', descripcio: 'Millora l\'anotació i el triple.', atributs: ['anotacio', 'triple'] },
+  { tipus: 'defensa', nom: 'Defensa', descripcio: 'Millora la defensa i els rebots.', atributs: ['defensa', 'rebot'] },
+  { tipus: 'fisic', nom: 'Físic', descripcio: 'Millora la velocitat i la resistència.', atributs: ['velocitat', 'resistencia'] },
+  { tipus: 'tactic', nom: 'Tàctic', descripcio: 'Millora una mica de tot: la intel·ligència de joc.', atributs: ['anotacio', 'defensa', 'velocitat'] },
 ];
 
 export function infoSessio(tipus: TipusSessio): SessioInfo {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Hand, CheckCircle2, XCircle } from 'lucide-react';
 import { avaluarRobatori, generarFinestraRobatori } from '../../game/minijocs';
 
 export function Robatori({ onFinish }: { onFinish: (encerts: number) => void }) {
@@ -33,12 +34,16 @@ export function Robatori({ onFinish }: { onFinish: (encerts: number) => void }) 
 
   return (
     <div className="minijoc">
-      <div className="minijoc-titol">🖐️ Robatori de pilota</div>
+      <div className="minijoc-titol" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Hand size={18} /> Robatori de pilota</div>
       <div className="minijoc-sub">Toca just quan el rival exposi la pilota</div>
-      <div className={`robatori-zona ${estat}`} onClick={clicar}>
+      <div className={`robatori-zona ${estat} ${estat === 'acabat' ? (resultat ? 'encert' : 'fallat') : ''}`} onClick={clicar}>
         {estat === 'esperant' && 'Espera...'}
         {estat === 'ara' && 'ARA!'}
-        {estat === 'acabat' && (resultat ? '🤾 Robada!' : '❌ Massa tard')}
+        {estat === 'acabat' && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            {resultat ? <CheckCircle2 size={20} /> : <XCircle size={20} />} {resultat ? 'Robada!' : 'Massa tard'}
+          </span>
+        )}
       </div>
     </div>
   );

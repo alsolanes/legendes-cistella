@@ -1,5 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, type ComponentType } from 'react';
+import { Award, Sparkles, PenLine, Frown, Sprout } from 'lucide-react';
 import { useJoc } from '../game/store';
+import { IconaToast } from '../game/store';
+
+const ICONA_TOAST: Record<IconaToast, ComponentType<{ size?: number | string }>> = {
+  assoliment: Award,
+  perk: Sparkles,
+  fitxatge: PenLine,
+  refusa: Frown,
+  cantera: Sprout,
+};
 
 export function Toasts() {
   const toasts = useJoc((s) => s.toasts);
@@ -8,22 +18,24 @@ export function Toasts() {
   return (
     <div className="toasts-capa">
       {toasts.slice(-4).map((t) => (
-        <ToastItem key={t.id} id={t.id} text={t.text} emoji={t.emoji} onClose={() => eliminarToast(t.id)} />
+        <ToastItem key={t.id} id={t.id} text={t.text} icona={t.icona} onClose={() => eliminarToast(t.id)} />
       ))}
     </div>
   );
 }
 
-function ToastItem({ id, text, emoji, onClose }: { id: string; text: string; emoji?: string; onClose: () => void }) {
+function ToastItem({ id, text, icona, onClose }: { id: string; text: string; icona?: IconaToast; onClose: () => void }) {
   useEffect(() => {
     const t = setTimeout(onClose, 4200);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  const Icona = icona ? ICONA_TOAST[icona] : null;
+
   return (
     <div className="toast" onClick={onClose}>
-      {emoji && <span className="toast-emoji">{emoji}</span>}
+      {Icona && <span className="toast-emoji"><Icona size={18} /></span>}
       <span>{text}</span>
     </div>
   );

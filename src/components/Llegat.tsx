@@ -1,7 +1,38 @@
+import { type ComponentType } from 'react';
+import {
+  Search, Handshake, ClipboardList, Star, Shield, Medal, Flame, Snowflake,
+  ChevronsUp, BookOpen, PenLine, TrendingUp, Brain, Crown, Zap, Sprout,
+} from 'lucide-react';
 import { useJoc } from '../game/store';
 import { equipIdealHistoric, PERKS, xpPerNivell, xpPerSeguentNivell } from '../game/llegat';
 import { calcularQuimica } from '../game/contractes';
 import { ASSOLIMENTS } from '../game/assoliments';
+import { IconTitul, IconSobre, IconPavello } from './icones';
+
+const ICONA_PERK: Record<string, ComponentType<{ size?: number | string }>> = {
+  ojeador: Search,
+  negociador: Handshake,
+  tactic: ClipboardList,
+  'llegenda-viva': Star,
+  immortal: Shield,
+};
+
+const ICONA_ASSOLIMENT: Record<string, ComponentType<{ size?: number | string }>> = {
+  'primera-victoria': Medal,
+  'racha-10': Flame,
+  'triple-decisiu': Snowflake,
+  'campio-lliga': IconTitul,
+  playoffs: ChevronsUp,
+  'album-complet': BookOpen,
+  'primer-sobre': IconSobre,
+  'primer-fitxatge': PenLine,
+  'entrenador-5': TrendingUp,
+  'entrenador-10': Brain,
+  'entrenador-20': Crown,
+  'pavello-maxim': IconPavello,
+  golejada: Zap,
+  'joia-cantera': Sprout,
+};
 
 export function Llegat() {
   const partida = useJoc((s) => s.partida);
@@ -17,7 +48,7 @@ export function Llegat() {
   return (
     <>
       <div className="card" style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 40 }}>🎖️</div>
+        <div style={{ display: 'flex', justifyContent: 'center' }}><IconTitul size={40} /></div>
         <h2 style={{ fontSize: 18, margin: '4px 0 2px' }}>Llegat de l&apos;entrenador</h2>
         <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--taronja)' }}>Nivell {llegat.nivell}</div>
         <div className="xp-barra"><div style={{ width: `${progres}%` }} /></div>
@@ -28,9 +59,10 @@ export function Llegat() {
         <div className="card-titol"><span>Perks</span></div>
         {PERKS.map((p) => {
           const desbloquejat = llegat.perks.includes(p.id);
+          const IconaPerk = ICONA_PERK[p.id];
           return (
             <div key={p.id} className={`perk-fila ${desbloquejat ? '' : 'blocat'}`}>
-              <div className="perk-emoji">{p.emoji}</div>
+              <div className="perk-emoji"><IconaPerk size={20} /></div>
               <div className="perk-info">
                 <strong>{p.nom} {!desbloquejat && `(nivell ${p.nivell})`}</strong>
                 <span>{p.descripcio}</span>
@@ -54,7 +86,7 @@ export function Llegat() {
           <div className="card-titol"><span>Palmarès</span></div>
           {llegat.titols.map((t, i) => (
             <div key={i} className="hist-item">
-              <span>🏆 {t.descripcio}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconTitul size={16} /> {t.descripcio}</span>
               <span style={{ color: 'var(--text-dim)' }}>T{t.temporada}</span>
             </div>
           ))}
@@ -90,9 +122,10 @@ export function Llegat() {
         <div className="card-titol"><span>Assoliments</span><span>{partida.assolimentsDesbloquejats.length}/{ASSOLIMENTS.length}</span></div>
         {ASSOLIMENTS.map((a) => {
           const fet = partida.assolimentsDesbloquejats.includes(a.id);
+          const IconaAssoliment = ICONA_ASSOLIMENT[a.id];
           return (
             <div key={a.id} className={`perk-fila ${fet ? '' : 'blocat'}`}>
-              <div className="perk-emoji">{a.emoji}</div>
+              <div className="perk-emoji"><IconaAssoliment size={20} /></div>
               <div className="perk-info">
                 <strong>{a.nom}</strong>
                 <span>{a.descripcio}</span>

@@ -1,8 +1,16 @@
 import { useState } from 'react';
+import { Dumbbell, Target, Shield, ClipboardList } from 'lucide-react';
 import { useJoc } from '../game/store';
 import { SESSIONS, SESSIONS_PER_SETMANA } from '../game/entrenament';
 import { TipusSessio } from '../game/types';
 import { mitjana } from '../game/generador';
+
+const ICONA_SESSIO: Record<TipusSessio, typeof Target> = {
+  tir: Target,
+  defensa: Shield,
+  fisic: Dumbbell,
+  tactic: ClipboardList,
+};
 
 export function Entrenament() {
   const partida = useJoc((s) => s.partida);
@@ -33,24 +41,27 @@ export function Entrenament() {
           <span>{restants}/{SESSIONS_PER_SETMANA} sessions restants</span>
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-          {SESSIONS.map((s) => (
-            <button
-              key={s.tipus}
-              className={`sessio-card ${tipus === s.tipus ? 'sel' : ''}`}
-              style={{ flex: '1 1 100px', textAlign: 'center', border: undefined }}
-              onClick={() => setTipus(s.tipus)}
-            >
-              <div style={{ fontSize: 22 }}>{s.emoji}</div>
-              <div style={{ fontWeight: 700, fontSize: 13 }}>{s.nom}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>{s.descripcio}</div>
-            </button>
-          ))}
+          {SESSIONS.map((s) => {
+            const IconaSessio = ICONA_SESSIO[s.tipus];
+            return (
+              <button
+                key={s.tipus}
+                className={`sessio-card ${tipus === s.tipus ? 'sel' : ''}`}
+                style={{ flex: '1 1 100px', textAlign: 'center', border: undefined }}
+                onClick={() => setTipus(s.tipus)}
+              >
+                <div style={{ display: 'flex', justifyContent: 'center' }}><IconaSessio size={22} /></div>
+                <div style={{ fontWeight: 700, fontSize: 13 }}>{s.nom}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>{s.descripcio}</div>
+              </button>
+            );
+          })}
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 10 }}>
           Instal·lacions nivell {partida.instalacions.nivell}: multiplicador d&apos;efectivitat x{multiplicador.toFixed(2)}
         </div>
         <button className="btn btn-primari btn-blok" onClick={fer} disabled={seleccionats.length === 0 || restants <= 0}>
-          🏋️ Entrenar {seleccionats.length > 0 ? `(${seleccionats.length} jugadors)` : ''}
+          <Dumbbell size={18} /> Entrenar {seleccionats.length > 0 ? `(${seleccionats.length} jugadors)` : ''}
         </button>
       </div>
 

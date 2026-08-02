@@ -1,9 +1,36 @@
 import { useState } from 'react';
+import {
+  ShoppingCart,
+  Sprout,
+  AlertTriangle,
+  Shield,
+  ArrowUp,
+  Coins,
+  Bandage,
+  Ban,
+  BatteryLow,
+  Star,
+  X,
+  RefreshCw,
+  DoorOpen,
+} from 'lucide-react';
+import { IconPilota } from './icones';
 import { useJoc } from '../game/store';
 import { Jugador, Posicio } from '../game/types';
 import { mitjana, simbolsJugador } from '../game/generador';
 import { tePerk } from '../game/llegat';
 import { aplicarDescompteNegociador } from '../game/contractes';
+
+function AvatarJugador({ jugador, mida = 38, background }: { jugador: Jugador; mida?: number; background: string }) {
+  if (jugador.avatar) {
+    return <img className="jugador-avatar" src={jugador.avatar} style={{ width: mida, height: mida }} alt="" />;
+  }
+  return (
+    <div className="jugador-avatar" style={{ width: mida, height: mida, background }}>
+      {jugador.nom.slice(0, 1)}
+    </div>
+  );
+}
 
 const POSICIONS: Posicio[] = ['Base', 'Escorta', 'Aler', 'Ala-pivot', 'Pivot'];
 const INICIALS_POS: Record<Posicio, string> = { Base: 'B', Escorta: 'E', Aler: 'A', 'Ala-pivot': 'AP', Pivot: 'P' };
@@ -16,6 +43,16 @@ const POSICIONS_PISTA: Record<Posicio, { x: number; y: number }> = {
   'Ala-pivot': { x: 35, y: 55 },
   Pivot: { x: 30, y: 40 },
 };
+
+function Estrelles({ n, size = 14 }: { n: number; size?: number }) {
+  return (
+    <div className="estrelles" style={{ display: 'inline-flex', gap: 2 }}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <Star key={i} size={size} fill={i < n ? 'currentColor' : 'none'} />
+      ))}
+    </div>
+  );
+}
 
 function etiquetaPotencial(potencial: number, veuExacte: boolean): string {
   if (veuExacte) return `${potencial}`;
@@ -63,7 +100,11 @@ export function Plantilla() {
   return (
     <>
       <div style={{ display: 'flex', gap: 4, background: 'var(--fons-elevat)', padding: 4, borderRadius: 14, marginBottom: 14 }}>
-        {([['equip', '🏀 Equip'], ['mercat', '🛒 Mercat'], ['cantera', '🌱 Cantera']] as const).map(([id, label]) => (
+        {([
+          ['equip', <><IconPilota size={16} /> Equip</>],
+          ['mercat', <><ShoppingCart size={16} /> Mercat</>],
+          ['cantera', <><Sprout size={16} /> Cantera</>],
+        ] as const).map(([id, label]) => (
           <button
             key={id}
             className={`tab ${vista === id ? 'activa' : ''}`}
@@ -79,7 +120,7 @@ export function Plantilla() {
         <>
           {titularsCansats.length > 0 && (
             <div className="card" style={{ borderColor: 'var(--vermell)' }}>
-              <div className="card-titol"><span>⚠️ Rotació recomanada</span></div>
+              <div className="card-titol"><span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><AlertTriangle size={18} /> Rotació recomanada</span></div>
               <div style={{ fontSize: 13, color: 'var(--text-dim)' }}>
                 {titularsCansats.map((j) => `${j.nom} ${j.cognom}`).join(', ')} {titularsCansats.length > 1 ? 'juguen' : 'juga'} cansats (forma baixa). Considera descansar-los.
               </div>
@@ -117,7 +158,7 @@ export function Plantilla() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
               <button className={`btn ${partida.alineacio.defensaPressing ? 'btn-primari' : 'btn-secundari'}`} style={{ flex: 1, padding: '8px', fontSize: 12 }} onClick={() => setPressing(!partida.alineacio.defensaPressing)}>
-                {partida.alineacio.defensaPressing ? '🛡 Pressió activa' : '🛡 Pressió: OFF'}
+                <Shield size={18} /> {partida.alineacio.defensaPressing ? 'Pressió activa' : 'Pressió: OFF'}
               </button>
               <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>
                 La pressió augmenta els robatoris però cansa més la plantilla
@@ -233,7 +274,7 @@ function Mercat({ teOjeador }: { teOjeador: boolean }) {
         const noPotPagar = partida.finanzas.pressupost < preu || partida.plantilla.length >= 14;
         return (
           <div key={j.id} className="jugador-card">
-            <div className="jugador-avatar" style={{ background: `linear-gradient(135deg, ${partida.colorPrincipal}, #00000066)` }}>{j.nom.slice(0, 1)}</div>
+            <AvatarJugador jugador={j} background={`linear-gradient(135deg, ${partida.colorPrincipal}, #00000066)`} />
             <div className="jugador-info">
               <div className="jugador-nom">
                 {j.nom} {j.cognom}
@@ -267,15 +308,15 @@ function Cantera({ teOjeador }: { teOjeador: boolean }) {
       {partida.cantera.length === 0 && <div style={{ fontSize: 13, color: 'var(--text-dim)' }}>Cap jove promès disponible aquesta temporada.</div>}
       {partida.cantera.map((j) => (
         <div key={j.id} className="jugador-card">
-          <div className="jugador-avatar" style={{ background: 'linear-gradient(135deg, #3ddc97, #0f6e4f)' }}>{j.nom.slice(0, 1)}</div>
+          <AvatarJugador jugador={j} background="linear-gradient(135deg, #3ddc97, #0f6e4f)" />
           <div className="jugador-info">
             <div className="jugador-nom">{j.nom} {j.cognom} <span className="badge">{j.edat} anys</span></div>
             <div className="jugador-sub">{j.posicio} · nivell actual {mitjana(j.atributs)} · potencial: {etiquetaPotencial(j.potencial ?? 50, teOjeador)}</div>
             <div className="simbols-fila">{simbolsJugador(j.atributs).map((s) => <span key={s} className="simbol-badge">{s}</span>)}</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <button className="btn btn-primari" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => pujarCantera(j.id)} disabled={partida.plantilla.length >= 14}>⬆ Pujar</button>
-            <button className="btn btn-secundari" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => vendreCantera(j.id)}>💸 Vendre</button>
+            <button className="btn btn-primari" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => pujarCantera(j.id)} disabled={partida.plantilla.length >= 14}><ArrowUp size={16} /> Pujar</button>
+            <button className="btn btn-secundari" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => vendreCantera(j.id)}><Coins size={16} /> Vendre</button>
           </div>
         </div>
       ))}
@@ -291,16 +332,14 @@ function JugadorFila({ jugador, onClick, accio, esTitular, colorPrincipal }: {
   const cansat = esTitular && jugador.forma < 45;
   return (
     <div className={`jugador-card ${esTitular ? 'titular' : ''} ${lesionat ? 'lesionat' : ''}`} onClick={onClick} style={{ cursor: 'pointer' }}>
-      <div className="jugador-avatar" style={{ background: lesionat ? '#444' : `linear-gradient(135deg, ${colorPrincipal}, #00000066)` }}>
-        {jugador.nom.slice(0, 1)}
-      </div>
+      <AvatarJugador jugador={jugador} background={lesionat ? '#444' : `linear-gradient(135deg, ${colorPrincipal}, #00000066)`} />
       <div className="jugador-info">
         <div className="jugador-nom">
           {jugador.nom} {jugador.cognom}
           {esTitular && <span className="badge" style={{ background: 'rgba(255,140,66,0.15)', color: 'var(--taronja)' }}>TIT</span>}
-          {lesionat && <span className="badge lesio">😷 {jugador.lesioSetmanes} set.</span>}
-          {jugador.estat === 'sancionat' && <span className="badge lesio">⛔ {jugador.sancionSetmanes} set.</span>}
-          {cansat && <span className="badge lesio">😓 Cansat</span>}
+          {lesionat && <span className="badge lesio" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Bandage size={12} /> {jugador.lesioSetmanes} set.</span>}
+          {jugador.estat === 'sancionat' && <span className="badge lesio" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Ban size={12} /> {jugador.sancionSetmanes} set.</span>}
+          {cansat && <span className="badge lesio" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><BatteryLow size={12} /> Cansat</span>}
         </div>
         <div className="jugador-sub">
           {jugador.posicio} · {jugador.edat} anys · {jugador.nacionalitat} · {jugador.sou.toLocaleString('ca')}€
@@ -309,7 +348,7 @@ function JugadorFila({ jugador, onClick, accio, esTitular, colorPrincipal }: {
         <div className="simbols-fila">{simbolsJugador(jugador.atributs).map((s) => <span key={s} className="simbol-badge">{s}</span>)}</div>
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-        <div className="estrelles">{'★'.repeat(jugador.estrelles)}{'☆'.repeat(5 - jugador.estrelles)}</div>
+        <Estrelles n={jugador.estrelles} size={14} />
         <div style={{ fontSize: 16, fontWeight: 800 }}>{força}</div>
         <div style={{ fontSize: 10, color: 'var(--text-dim)' }}>FOR {jugador.forma}</div>
       </div>
@@ -338,13 +377,13 @@ function DetallJugador({ jugador, onClose }: { jugador: Jugador; onClose: () => 
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <h2 style={{ fontSize: 18 }}>{jugador.nom} {jugador.cognom}</h2>
-          <button className="btn btn-secundari" style={{ padding: '6px 10px' }} onClick={onClose}>✕</button>
+          <button className="btn btn-secundari" style={{ padding: '6px 10px' }} onClick={onClose}><X size={20} /></button>
         </div>
         <div className="jugador-sub" style={{ marginBottom: 8 }}>
           {jugador.posicio} · {jugador.edat} anys · {jugador.nacionalitat} · Contracte: {jugador.contracteAnys} any(s)
         </div>
         <div className="simbols-fila" style={{ marginBottom: 10 }}>{simbolsJugador(jugador.atributs).map((s) => <span key={s} className="simbol-badge">{s}</span>)}</div>
-        <div className="estrelles" style={{ marginBottom: 14 }}>{'★'.repeat(jugador.estrelles)}{'☆'.repeat(5 - jugador.estrelles)}</div>
+        <div style={{ marginBottom: 14 }}><Estrelles n={jugador.estrelles} size={18} /></div>
         <div className="detall-atributs" style={{ marginBottom: 14 }}>
           {atributs.map(([nom, v]) => (
             <div key={nom} className="detall-atribut">
@@ -358,9 +397,9 @@ function DetallJugador({ jugador, onClose }: { jugador: Jugador; onClose: () => 
           <strong>{valor.toLocaleString('ca')}€</strong>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <button className="btn btn-secundari" onClick={() => { renovar(jugador.id); onClose(); }}>🔄 Renovar contracte (+10% sou, no sempre accepten)</button>
-          <button className="btn btn-secundari" onClick={() => { vendre(jugador.id); onClose(); }}>💸 Vendre ({valor.toLocaleString('ca')}€)</button>
-          <button className="btn btn-perill" onClick={() => { acomiadar(jugador.id); onClose(); }}>🚪 Acomiadar (50% indemnització)</button>
+          <button className="btn btn-secundari" onClick={() => { renovar(jugador.id); onClose(); }}><RefreshCw size={18} /> Renovar contracte (+10% sou, no sempre accepten)</button>
+          <button className="btn btn-secundari" onClick={() => { vendre(jugador.id); onClose(); }}><Coins size={18} /> Vendre ({valor.toLocaleString('ca')}€)</button>
+          <button className="btn btn-perill" onClick={() => { acomiadar(jugador.id); onClose(); }}><DoorOpen size={18} /> Acomiadar (50% indemnització)</button>
         </div>
       </div>
     </div>

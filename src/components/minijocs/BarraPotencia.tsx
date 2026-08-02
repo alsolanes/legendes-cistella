@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Hand } from 'lucide-react';
 import { avaluarParada, generarZonaOptima } from '../../game/minijocs';
 
 export function BarraPotencia({ dificultat, onResultat }: { dificultat: number; onResultat: (encert: boolean) => void }) {
@@ -26,7 +27,7 @@ export function BarraPotencia({ dificultat, onResultat }: { dificultat: number; 
           : <div className="barra-marcador aturat" style={{ left: `${aturat}%` }} />}
       </div>
       <button className="btn btn-primari btn-blok" onClick={parar} disabled={aturat !== null}>
-        ✋ Para la barra!
+        <Hand size={18} /> Para la barra!
       </button>
     </div>
   );

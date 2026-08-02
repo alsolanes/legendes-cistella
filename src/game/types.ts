@@ -43,6 +43,8 @@ export interface Jugador {
   potencial?: number;
   /** Preu de traspàs si ve del mercat (diferent del sou) */
   preuFitxatge?: number;
+  /** Nom del fitxer d'avatar generat (a src/assets/), assignat de forma pseudoaleatòria */
+  avatar: string;
 }
 
 export type FormacioEsquema = 'clasica' | 'exterior' | 'interior' | 'transicio' | 'zona23';
@@ -64,6 +66,8 @@ export interface Rival {
   colorSecundari: string;
   nivell: number; // 1-99 força global
   plantilla: Jugador[];
+  /** Escut genèric assignat pseudoaleatòriament (veure src/game/escuts.ts) */
+  escut?: string;
 }
 
 export interface PartitEvent {
@@ -230,6 +234,7 @@ export interface Cromo {
   mitjana: number;
   especial: boolean; // cromo de rival famós
   clubOrigen?: string;
+  avatar?: string;
 }
 
 export interface ColleccioCromos {

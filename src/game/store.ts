@@ -18,10 +18,12 @@ import { calcularLuxuryTaxSetmanal, intentaRenovacio, aplicarDescompteNegociador
 import { generarPlayoffs, jugarRondaPlayoffs } from './playoffs';
 import { anecdotaAleatoria } from './anecdotes';
 
+export type IconaToast = 'assoliment' | 'perk' | 'fitxatge' | 'refusa' | 'cantera';
+
 export interface Toast {
   id: string;
   text: string;
-  emoji?: string;
+  icona?: IconaToast;
 }
 
 export type Celebracio = 'victoria' | 'titol' | 'campio' | null;
@@ -57,10 +59,10 @@ function aplicarPremiRuletaAPartida(partida: Partida, premi: PremiRuleta): Parti
   return partida;
 }
 
-function ambAssolimentsNous(p: Partida, afegirToast: (text: string, emoji?: string) => void): Partida {
+function ambAssolimentsNous(p: Partida, afegirToast: (text: string, icona?: IconaToast) => void): Partida {
   const nous = comprovarAssolimentsNous(p);
   if (nous.length === 0) return p;
-  for (const a of nous) afegirToast(`${a.emoji} Assoliment: ${a.nom}`, a.emoji);
+  for (const a of nous) afegirToast(`Assoliment: ${a.nom}`, 'assoliment');
   return { ...p, assolimentsDesbloquejats: [...p.assolimentsDesbloquejats, ...nous.map((a) => a.id)] };
 }
 
@@ -100,7 +102,7 @@ interface JocState {
   saltarMinijoc: () => void;
   jugarPlayoff: () => void;
   novaTemporadaClub: () => void;
-  afegirToast: (text: string, emoji?: string) => void;
+  afegirToast: (text: string, icona?: IconaToast) => void;
   eliminarToast: (id: string) => void;
   tancarAnecdota: () => void;
   netejarEfemers: () => void;
@@ -167,8 +169,8 @@ export const useJoc = create<JocState>()(
           p = { ...p, playoffs: generarPlayoffs(p) };
         }
 
-        const toasts: Toast[] = [...get().toasts, ...perksNous.map((perk) => ({ id: uid(), text: `${perk.emoji} Nou perk desbloquejat: ${perk.nom}`, emoji: perk.emoji }))];
-        p = ambAssolimentsNous(p, (text, emoji) => toasts.push({ id: uid(), text, emoji }));
+        const toasts: Toast[] = [...get().toasts, ...perksNous.map((perk) => ({ id: uid(), text: `Nou perk desbloquejat: ${perk.nom}`, icona: 'perk' as const }))];
+        p = ambAssolimentsNous(p, (text, icona) => toasts.push({ id: uid(), text, icona }));
 
         const anecdota = Math.random() < 0.35 ? anecdotaAleatoria(p) : null;
 
@@ -188,7 +190,7 @@ export const useJoc = create<JocState>()(
         const bonus = bonusPerMinijoc(minijocPendent.tipus, encerts);
         let p = bonus > 0 ? aplicarBonusPartit(partida, bonus) : partida;
         const toasts = [...get().toasts];
-        p = ambAssolimentsNous(p, (text, emoji) => toasts.push({ id: uid(), text, emoji }));
+        p = ambAssolimentsNous(p, (text, icona) => toasts.push({ id: uid(), text, icona }));
         set({ partida: p, minijocPendent: null, toasts, celebracio: bonus > 0 ? 'victoria' : get().celebracio });
       },
 
@@ -249,8 +251,8 @@ export const useJoc = create<JocState>()(
           mercat: partida.mercat.filter((j) => j.id !== id),
           finanzas: { ...partida.finanzas, pressupost: partida.finanzas.pressupost - preu, despesesTemporada: partida.finanzas.despesesTemporada + preu },
         };
-        const toasts = [...get().toasts, { id: uid(), text: `✍️ ${jugador.nom} ${jugador.cognom} fitxa pel club!`, emoji: '✍️' }];
-        p = ambAssolimentsNous(p, (text, emoji) => toasts.push({ id: uid(), text, emoji }));
+        const toasts = [...get().toasts, { id: uid(), text: `${jugador.nom} ${jugador.cognom} fitxa pel club!`, icona: 'fitxatge' as const }];
+        p = ambAssolimentsNous(p, (text, icona) => toasts.push({ id: uid(), text, icona }));
         set({ partida: p, toasts });
         return true;
       },
@@ -286,7 +288,7 @@ export const useJoc = create<JocState>()(
           };
           set({
             partida: sanejarAlineacio(base),
-            toasts: [...get().toasts, { id: uid(), text: `😤 ${jugador.nom} ${jugador.cognom} ha refusat renovar i ha quedat lliure`, emoji: '😤' }],
+            toasts: [...get().toasts, { id: uid(), text: `${jugador.nom} ${jugador.cognom} ha refusat renovar i ha quedat lliure`, icona: 'refusa' as const }],
           });
           return;
         }
@@ -298,7 +300,7 @@ export const useJoc = create<JocState>()(
             plantilla: partida.plantilla.map((j) => (j.id === id ? { ...j, contracteAnys: 2, sou: nouSou } : j)),
             finanzas: { ...partida.finanzas, pressupost: partida.finanzas.pressupost - nouSou },
           },
-          toasts: [...get().toasts, { id: uid(), text: `✍️ ${jugador.nom} ${jugador.cognom} ha renovat contracte`, emoji: '✍️' }],
+          toasts: [...get().toasts, { id: uid(), text: `${jugador.nom} ${jugador.cognom} ha renovat contracte`, icona: 'fitxatge' as const }],
         });
       },
 
@@ -328,7 +330,7 @@ export const useJoc = create<JocState>()(
             plantilla: [...partida.plantilla, { ...jove, contracteAnys: 3 }],
             cantera: partida.cantera.filter((j) => j.id !== id),
           },
-          toasts: [...get().toasts, { id: uid(), text: `🌱 ${jove.nom} ${jove.cognom} puja al primer equip!`, emoji: '🌱' }],
+          toasts: [...get().toasts, { id: uid(), text: `${jove.nom} ${jove.cognom} puja al primer equip!`, icona: 'cantera' as const }],
         });
         return true;
       },
@@ -378,7 +380,7 @@ export const useJoc = create<JocState>()(
           finanzas: { ...partida.finanzas, pressupost: partida.finanzas.pressupost - PREU_SOBRE },
         };
         const toasts = [...get().toasts];
-        p = ambAssolimentsNous(p, (text, emoji) => toasts.push({ id: uid(), text, emoji }));
+        p = ambAssolimentsNous(p, (text, icona) => toasts.push({ id: uid(), text, icona }));
         set({ partida: p, darrerSobre: cromosNous, toasts });
         return true;
       },
@@ -453,7 +455,7 @@ export const useJoc = create<JocState>()(
         }
         if (p.playoffs?.campio === 'meu') celebracio = 'campio';
         const toasts = [...get().toasts];
-        p = ambAssolimentsNous(p, (text, emoji) => toasts.push({ id: uid(), text, emoji }));
+        p = ambAssolimentsNous(p, (text, icona) => toasts.push({ id: uid(), text, icona }));
         set({ partida: p, celebracio, toasts });
       },
 
@@ -473,7 +475,7 @@ export const useJoc = create<JocState>()(
         set({ partida: p, ultimaJornada: null, minijocPendent: null, celebracio: esCampio ? 'titol' : null, pestanya: 'tauler' });
       },
 
-      afegirToast: (text, emoji) => set((state) => ({ toasts: [...state.toasts, { id: uid(), text, emoji }] })),
+      afegirToast: (text, icona) => set((state) => ({ toasts: [...state.toasts, { id: uid(), text, icona }] })),
       eliminarToast: (id) => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
       tancarAnecdota: () => set({ anecdotaPendent: null }),
       netejarEfemers: () => set({ toasts: [], minijocPendent: null, celebracio: null, anecdotaPendent: null, darrerSobre: null }),

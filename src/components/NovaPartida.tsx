@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Rocket, Map as IconMap, Calendar, Wallet, TrendingUp } from 'lucide-react';
 import { useJoc } from '../game/store';
-import { MapaCatalunya } from './MapaCatalunya';
+import { MapaCatalunya, PobleClicable } from './MapaCatalunya';
 import { formatNomPoble, getTownPointFlexible, poblesDeComarca } from '../utils/catalunyaMap';
 import { IconPilota, IconSobre } from './icones';
 import fonsNovaPartida from '../assets/fons-nova-partida.webp';
@@ -27,6 +27,16 @@ export function NovaPartida() {
   const [color, setColor] = useState(0);
 
   const pobles = useMemo(() => (comarca ? poblesDeComarca(comarca) : []), [comarca]);
+  // Pobles amb coordenades reals: es dibuixen al mapa com a punts clicables
+  const poblesClicables = useMemo<PobleClicable[]>(() => {
+    if (!comarca) return [];
+    return pobles
+      .map((p) => {
+        const pt = getTownPointFlexible(p);
+        return pt ? { nom: p, x: pt.x, y: pt.y } : null;
+      })
+      .filter((x): x is PobleClicable => !!x);
+  }, [comarca, pobles]);
   const puntPoble = useMemo(() => (poble ? getTownPointFlexible(poble) : null), [poble]);
 
   const potCrear = nom.trim().length >= 2 && !!poble;
@@ -75,8 +85,16 @@ export function NovaPartida() {
         <MapaCatalunya
           comarcaSeleccionada={comarca}
           onSeleccionarComarca={triarComarca}
+          pobles={poblesClicables}
+          onSeleccionarPoble={triarPoble}
+          pobleSeleccionat={poble}
           marcadors={puntPoble ? [{ x: puntPoble.x, y: puntPoble.y, color: COLORS[color][0], label: formatNomPoble(poble!), mida: 5.5 }] : []}
         />
+        {comarca && (
+          <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 8, textAlign: 'center' }}>
+            Fes zoom al mapa (roda/pinch) per veure els pobles separats, o tria'ls aquí:
+          </div>
+        )}
         {comarca && (
           <div className="pobles-llista">
             {pobles.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>Sense pobles per aquesta comarca.</div>}

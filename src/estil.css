@@ -660,12 +660,58 @@ button {
 .bracket-punts { font-variant-numeric: tabular-nums; color: var(--text-dim); padding: 0 10px; }
 
 /* ── Mapa de Catalunya ── */
+.mapa-zoom { position: relative; }
+.mapa-zoom-wrap {
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--vora);
+  background: var(--fons-elevat);
+  touch-action: none; /* necessari per al pinch/pan amb dits */
+  cursor: grab;
+  user-select: none;
+}
+.mapa-zoom-wrap:active { cursor: grabbing; }
 .mapa-catalunya { width: 100%; height: auto; display: block; max-height: 340px; }
 .mapa-comarca { fill: var(--fons-elevat); stroke: var(--vora); stroke-width: 0.6; transition: fill 0.15s; }
 .mapa-comarca.clicable { cursor: pointer; }
 .mapa-comarca.clicable:hover { fill: rgba(255, 140, 66, 0.35); }
 .mapa-comarca.sel { fill: var(--taronja); }
 .mapa-etiqueta { fill: var(--text); font-size: 7px; font-weight: 700; paint-order: stroke; stroke: var(--fons); stroke-width: 1.5px; }
+
+/* Pobles clicables al mapa */
+.mapa-poble { cursor: pointer; }
+.mapa-poble-hit { fill: transparent; }
+.mapa-poble-dot { fill: var(--taronja); stroke: var(--fons); stroke-width: 0.8; transition: r 0.1s; }
+.mapa-poble:hover .mapa-poble-dot { fill: #ffb27a; }
+.mapa-poble.sel .mapa-poble-dot { fill: var(--verd); r: 3.4; }
+.mapa-etiqueta-poble {
+  fill: var(--text); font-size: 5.5px; font-weight: 700;
+  paint-order: stroke; stroke: var(--fons); stroke-width: 1.6px;
+  opacity: 0.85;
+}
+.mapa-poble:hover .mapa-etiqueta-poble { opacity: 1; font-size: 6.5px; }
+
+/* Botons de zoom */
+.mapa-zoom-botons {
+  position: absolute; right: 8px; top: 8px;
+  display: flex; flex-direction: column; gap: 4px;
+  z-index: 2;
+}
+.mapa-zoom-botons .btn {
+  width: 34px; height: 34px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(11, 14, 20, 0.85);
+  border-color: var(--vora);
+  backdrop-filter: blur(4px);
+}
+.mapa-zoom-botons .btn:hover { background: var(--fons-card); }
+.mapa-zoom-hint {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  font-size: 10px; color: var(--text-dim);
+  background: rgba(11, 14, 20, 0.8); padding: 3px 10px; border-radius: 999px;
+  white-space: nowrap; z-index: 2;
+  pointer-events: none;
+}
 .pobles-llista { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; max-height: 170px; overflow-y: auto; }
 
 @media (max-width: 480px) {

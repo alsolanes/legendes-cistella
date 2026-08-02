@@ -1,7 +1,7 @@
 // ── Lògica de temporada: lliga, calendari, finances ───────────
-import { ClassificacioFila, Noticia, Partida, PartitSimulat } from './types';
+import { ClassificacioFila, Noticia, Partida, PartitSimulat, Posicio } from './types';
 import { entre } from './dades';
-import { crearRivalsLliga, plantillaInicial, envellirPlantilla, generarMercat } from './generador';
+import { crearRivalsLliga, plantillaInicial, envellirPlantilla, generarMercat, mitjana } from './generador';
 import { EquipPartit, simularPartit, aplicarResultat } from './motor';
 import { generarCantera } from './cantera';
 import { crearLlegatInicial } from './llegat';
@@ -41,6 +41,17 @@ export function crearPartida(cfg: NovaPartidaConfig): Partida {
 
   const calendari = generarCalendari(totsEquips);
 
+  const POSICIONS_QUINTET: Posicio[] = ['Base', 'Escorta', 'Aler', 'Ala-pivot', 'Pivot'];
+  // Quintet inicial: el MILLOR jugador de cada posició (no els 5 primers de la llista,
+  // que per distribució serien 3 Bases + 2 Escortes i deixarien la pista apilada)
+  const titulars = POSICIONS_QUINTET.map((pos) => {
+    const millor = plantilla
+      .filter((j) => j.posicio === pos)
+      .sort((a, b) => mitjana(b.atributs) - mitjana(a.atributs))[0];
+    return millor?.id;
+  }).filter((id): id is string => !!id);
+  const banqueta = plantilla.filter((j) => !titulars.includes(j.id)).map((j) => j.id);
+
   return {
     versio: 1,
     clubNom: cfg.clubNom,
@@ -51,8 +62,8 @@ export function crearPartida(cfg: NovaPartidaConfig): Partida {
     pavello: { nom: `Pavelló Municipal de ${cfg.ciutat}`, capacitat: 1800, nivell: 1, preuPerNivell: 50000 },
     plantilla,
     alineacio: {
-      titulars: plantilla.slice(0, 5).map((j) => j.id),
-      banqueta: plantilla.slice(5).map((j) => j.id),
+      titulars,
+      banqueta,
       esquema: 'clasica',
       rotacio: true,
       defensaPressing: false,
@@ -150,7 +161,22 @@ function mitjanaAtributs(j: Partida['plantilla'][number]): number {
  */
 export function sanejarAlineacio(partida: Partida): Partida {
   const idsPlantilla = new Set(partida.plantilla.map((j) => j.id));
-  const titulars = partida.alineacio.titulars.filter((id) => idsPlantilla.has(id));
+  const titularsValids = partida.alineacio.titulars.filter((id) => idsPlantilla.has(id));
+  const plantillaPerId = new Map(partida.plantilla.map((j) => [j.id, j]));
+  const POSICIONS_Q: Posicio[] = ['Base', 'Escorta', 'Aler', 'Ala-pivot', 'Pivot'];
+
+  // Garantia: 1 titular per posició (corregeix partides velles amb 3 Bases + 2 Escortes)
+  const titulars: string[] = [];
+  for (const pos of POSICIONS_Q) {
+    const candidatId =
+      titularsValids.find((id) => plantillaPerId.get(id)?.posicio === pos) ?? // manté el titular ben posicionat
+      partida.plantilla
+        .filter((j) => j.posicio === pos && !titulars.includes(j.id))
+        .sort((a, b) => mitjanaAtributs(b) - mitjanaAtributs(a))[0]?.id; // millor de la posició si falta
+    if (candidatId) titulars.push(candidatId);
+  }
+  // Si alguna posició no té jugador (tots venuts/acomiadats), completa amb els
+  // millors de la banqueta per no deixar el quintet curt (el motor exigeix 5).
   if (titulars.length < 5) {
     const disponibles = partida.plantilla
       .filter((j) => !titulars.includes(j.id))
@@ -160,6 +186,7 @@ export function sanejarAlineacio(partida: Partida): Partida {
       titulars.push(candidat.id);
     }
   }
+
   const banqueta = partida.plantilla.filter((j) => !titulars.includes(j.id)).map((j) => j.id);
   return { ...partida, alineacio: { ...partida.alineacio, titulars, banqueta } };
 }

@@ -260,7 +260,12 @@ button {
   position: relative;
   background: var(--pista);
   border-radius: 14px;
-  height: 430px;
+  /* Pista de bàsquet real ~2:1 (28m x 15m). Abans tenia height fixa 430px
+     i en pantalles estretes quedava deformada (més alta que ampla). */
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  min-height: 220px;
+  max-height: 460px;
   overflow: hidden;
   border: 3px solid var(--ratlla);
   margin-bottom: 14px;
@@ -282,14 +287,14 @@ button {
 .pista-linia.arc-local { left: 0; top: 0; bottom: 0; width: 60px; }
 .pista-linia.arc-visitant { right: 0; top: 0; bottom: 0; width: 60px; }
 .pista-linia.tres-local {
-  left: 30px; top: 50%; transform: translateY(-50%);
-  width: 90px; height: 180px;
+  left: 8%; top: 50%; transform: translateY(-50%);
+  width: 14%; height: 42%;
   border-radius: 50%;
   border: 2px solid var(--ratlla);
 }
 .pista-linia.tres-visitant {
-  right: 30px; top: 50%; transform: translateY(-50%);
-  width: 90px; height: 180px;
+  right: 8%; top: 50%; transform: translateY(-50%);
+  width: 14%; height: 42%;
   border-radius: 50%;
   border: 2px solid var(--ratlla);
 }

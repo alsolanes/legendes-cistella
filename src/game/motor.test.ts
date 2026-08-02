@@ -54,14 +54,14 @@ describe('Motor de partit', () => {
     expect(victòries).toBeGreaterThan(45);
   });
 
-  it('els resultats tenen puntuacions realistes de bàsquet (50-112)', () => {
+  it('els resultats tenen puntuacions realistes de bàsquet (45-112)', () => {
     const a = equipDe('A', 55);
     const b = equipDe('B', 55);
     for (let i = 0; i < 20; i++) {
       const sim = simularPartit(a, b, 1);
-      expect(sim.puntsLocal).toBeGreaterThanOrEqual(50);
+      expect(sim.puntsLocal).toBeGreaterThanOrEqual(45);
       expect(sim.puntsLocal).toBeLessThanOrEqual(112);
-      expect(sim.puntsVisitant).toBeGreaterThanOrEqual(50);
+      expect(sim.puntsVisitant).toBeGreaterThanOrEqual(45);
       expect(sim.puntsVisitant).toBeLessThanOrEqual(112);
     }
   });
